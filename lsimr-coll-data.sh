@@ -15,7 +15,7 @@ check_raw_file() {
 }
 
 create_raw_file() {
-    $STORCLI storcli /c$CTLID show all J >> $OUT
+    $STORCLI storcli /c$CTLID show all J > $OUT
 }
 
 done
