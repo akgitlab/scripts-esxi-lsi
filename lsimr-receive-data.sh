@@ -5,7 +5,7 @@
 KEY="/var/lib/zabbix/.ssh/id_rsa"
 IN="/usr/lib/zabbix/reports/hypervisors/$HOST/lsimr-$CTLID-all-info.json"
 
-cat /usr/lib/zabbix/scripts/esxi/hosts |  while read HOST ADDRESS CTRL
+cat /usr/lib/zabbix/externalscripts/.git/branches/main/esxi/lsi/hosts | while read HOST ADDRESS CTRL
 do
 scp -i $KEY zabbix@$ADDRESS:/tmp/lsimr-$CTRL-all-info.json /usr/lib/zabbix/reports/hypervisors/$HOST/lsimr-$CTRL-all-info.json
 
