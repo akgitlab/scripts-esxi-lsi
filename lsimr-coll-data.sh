@@ -6,7 +6,7 @@ CTRID=$1
 STORCLI="/opt/lsi/storcli"
 OUT="/tmp/lsimr-$CTLID-all-info.json"
 
-check_raw_file() {
+check_old_file() {
     if [ -e $OUT ]; then
         rm -rf $OUT
     else
@@ -14,7 +14,7 @@ check_raw_file() {
     fi
 }
 
-create_raw_file() {
+create_new_file() {
     $STORCLI storcli /$CTLID show all J > $OUT
 }
 
