@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>4.4</version>
+    <date>2022-02-19T13:05:10Z</date>
+    <groups>
+        <group>
+            <name>Templates/Modules</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template Module ICMP Ping From The Linux Agent</template>
+            <name>Template Module ICMP Ping From The Linux Agent</name>
+            <description>Пинг хоста с агента на линуксе</description>
+            <groups>
+                <group>
+                    <name>Templates/Modules</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>Status of simple inside check</name>
+                </application>
+            </applications>
+            <items>
+                <item>
+                    <name>ICMP packet loss when ping to control host {$CONTROL.HOST}</name>
+                    <key>inside.icmppingloss[{$CONTROL.HOST}]</key>
+                    <value_type>FLOAT</value_type>
+                    <units>%</units>
+                    <description>Потери пакетов от агента мониторинга до хоста, определенного в макросе {$CONTROL.HOST}</description>
+                    <applications>
+                        <application>
+                            <name>Status of simple inside check</name>
+                        </application>
+                    </applications>
+                </item>
+                <item>
+                    <name>ICMP response time of control host {$CONTROL.HOST}</name>
+                    <key>inside.icmppingsec[{$CONTROL.HOST}]</key>
+                    <delay>10s</delay>
+                    <value_type>FLOAT</value_type>
+                    <units>ms</units>
+                    <description>Время отклика от агента мониторинга до хоста, определенного в макросе {$CONTROL.HOST}</description>
+                    <applications>
+                        <application>
+                            <name>Status of simple inside check</name>
+                        </application>
+                    </applications>
+                </item>
+                <item>
+                    <name>ICMP availability to control host {$CONTROL.HOST}</name>
+                    <key>inside.icmpping[{$CONTROL.HOST}]</key>
+                    <description>Сетевая доступность хоста, определенного в макросе {$CONTROL.HOST} со стороны агента мониторинга</description>
+                    <applications>
+                        <application>
+                            <name>Status of simple inside check</name>
+                        </application>
+                    </applications>
+                    <valuemap>
+                        <name>Service state</name>
+                    </valuemap>
+                </item>
+            </items>
+            <macros>
+                <macro>
+                    <macro>{$CONTROL.HOST}</macro>
+                </macro>
+            </macros>
+        </template>
+    </templates>
+    <value_maps>
+        <value_map>
+            <name>Service state</name>
+            <mappings>
+                <mapping>
+                    <value>0</value>
+                    <newvalue>Down</newvalue>
+                </mapping>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>Up</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+    </value_maps>
+</zabbix_export>
