@@ -1,0 +1,89 @@
+Настройка
+
+1) На хосте ESXi XX.XX создаем локального пользователя zabbix с паролем (обычные команды Linux не сработают, поэтому добавляем через busybox)
+
+shell> ssh root@{HOST.IP}
+shell> /usr/lib/vmware/busybox/bin/busybox adduser -H -h /tmp -G root -s /bin/sh zabbix
+
+
+2) Создаем на хосте каталог для хранения ключа авторизации этого пользователя
+
+shell> mkdir /etc/ssh/keys-zabbix
+
+
+3) Редактируем файл для авторизации пользователя zabbix по SSH
+
+shell> vi /etc/security/access.conf
+...
++:zabbix:ALL
+...
+Возможна проблема в том, что access.conf сбрасывается не только после перезагрузки, но и после создания пользователей, ролей и т. д.,
+поэтому придется добавлять его восстановление в начальную загрузку, например через /etc/rc.local (если ESXi 4.x или ESXi 5.0)
+или в /etc/rc.local.d/local.sh (если ESXi 5.1+).
+
+
+4) Копируем публичный ключ с сервера мониторинга на хост (для авторизации потребуется ввести пароль пользователя root на esxi)
+
+shell> sudo scp /var/lib/zabbix/.ssh/id_rsa.pub root@{HOST.IP}:/etc/ssh/keys-zabbix/authorized_keys
+
+
+5) Проверяем загрузку данных с хоста в формате JSON на сервер мониторинга
+
+shell> sudo ssh -i /var/lib/zabbix/.ssh/id_rsa zabbix@{HOST.IP} '/opt/lsi/storcli/storcli /c0 show all j'
+
+
+6) На сервере мониторинга создаем файл конфигурации
+
+shell> sudo nano /etc/zabbix/zabbix_agentd.d/lsimr.conf
+UserParameter=lsimr.ctl.info[*],sudo /etc/zabbix/scripts/lsimr-ctl-info.sh $1 $2
+UserParameter=lsimr.ctl.cvs.info[*],sudo /etc/zabbix/scripts/lsimr-cvs-info.sh $1 $2
+UserParameter=lsimr.ctl.bbu.info[*],sudo /etc/zabbix/scripts/lsimr-bbu-info.sh $1 $2
+UserParameter=lsimr.vd.info[*],sudo /etc/zabbix/scripts/lsimr-vd-info.sh $1 $2
+UserParameter=lsimr.pd.info[*],sudo /etc/zabbix/scripts/lsimr-pd-info.sh $1 $2
+UserParameter=lsimr.pd.ne.info[*],sudo /etc/zabbix/scripts/lsimr-pd-info-ne.sh $1 $2
+UserParameter=lsimr.pd.all.info[*],sudo /etc/zabbix/scripts/lsimr-pd-info-all.sh $1 $2
+UserParameter=lsimr.pd.ne.all.info[*],sudo /etc/zabbix/scripts/lsimr-pd-info-all.sh $1 $2
+
+
+7) Разрешаем пользователю zabbix выполнение скриптов без запроса пароля
+
+shell> sudo visudo
+
+... 
+# User privilege specification
+zabbix ALL=(ALL) NOPASSWD: /etc/zabbix/scripts/lsimr-bbu-info.sh 
+zabbix ALL=(ALL) NOPASSWD: /etc/zabbix/scripts/lsimr-ctl-info.sh 
+zabbix ALL=(ALL) NOPASSWD: /etc/zabbix/scripts/lsimr-cvs-info.sh 
+zabbix ALL=(ALL) NOPASSWD: /etc/zabbix/scripts/lsimr-pd-info-all.sh 
+zabbix ALL=(ALL) NOPASSWD: /etc/zabbix/scripts/lsimr-pd-info-ne.sh 
+zabbix ALL=(ALL) NOPASSWD: /etc/zabbix/scripts/lsimr-pd-info.sh 
+zabbix ALL=(ALL) NOPASSWD: /etc/zabbix/scripts/lsimr-vd-info.sh 
+...
+
+Предупреждение! Никогда не редактируйте этот файл в обычном текстовом редакторе! Всегда используйте для этой цели только команду visudo.
+Неправильный синтаксис файла /etc/sudoers может нарушить работу системы и сделать невозможным получение повышенного уровня привилегий,
+поэтому очень важно использовать для его редактирования команду visudo.
+
+
+8) Копируем скрипты из репозитория на сервер и делаем их исполняемыми
+
+shell> sudo svn checkout https://github.com/akgitlab/templates/trunk/hardware/lsi/scripts /etc/zabbix/scripts
+shell> sudo find /etc/zabbix/scripts -iname "*.sh" -exec bash -c 'chmod +x "$0"' {} \;
+
+
+9) Перезапускаем агента мониторинга
+
+shell> sudo service zabbix-agent restart
+
+
+10) Скачиваем шаблон из репозитория и импортируем его
+https://raw.githubusercontent.com/akgitlab/templates/main/hardware/lsi/template/lsimr_json_lld_v1.xml
+
+
+11) Создаем узел сети на сервере мониторинга и назначаем шаблон
+
+
+12) Правим макрос, содержащий IP адрес хотста
+
+
+В соответствии с таймингами обнаружения данные начнут собираться в течение 1 часа.
