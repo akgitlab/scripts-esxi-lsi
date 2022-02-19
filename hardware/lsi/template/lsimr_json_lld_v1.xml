@@ -1,0 +1,1801 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>4.4</version>
+    <date>2022-02-19T05:58:14Z</date>
+    <groups>
+        <group>
+            <name>Templates/Server hardware</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template LSI MegaRAID Controller</template>
+            <name>Template LSI MegaRAID Controller</name>
+            <groups>
+                <group>
+                    <name>Templates/Server hardware</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>LSI MegaRAID batterry backup unit</name>
+                </application>
+                <application>
+                    <name>LSI MegaRAID controllers</name>
+                </application>
+                <application>
+                    <name>LSI MegaRAID physical drives</name>
+                </application>
+                <application>
+                    <name>LSI MegaRAID virtual drives</name>
+                </application>
+                <application>
+                    <name>LSI MegaRAID X internal items</name>
+                </application>
+            </applications>
+            <items>
+                <item>
+                    <name>All physical drives info</name>
+                    <key>lsimr.pd.info[{$HV.ADDRESS}]</key>
+                    <delay>1h</delay>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <applications>
+                        <application>
+                            <name>LSI MegaRAID X internal items</name>
+                        </application>
+                    </applications>
+                </item>
+                <item>
+                    <name>All virtual drives info</name>
+                    <key>lsimr.vd.info[{$HV.ADDRESS}]</key>
+                    <delay>10m</delay>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <applications>
+                        <application>
+                            <name>LSI MegaRAID X internal items</name>
+                        </application>
+                    </applications>
+                </item>
+            </items>
+            <discovery_rules>
+                <discovery_rule>
+                    <name>Controllers discovery</name>
+                    <key>lsimr.ctl.info[{$HV.ADDRESS}]</key>
+                    <delay>1h</delay>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} backup battery info</name>
+                            <key>lsimr.ctl.bbu.info[{$HV.ADDRESS},{#CTLID}]</key>
+                            <delay>10m</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID X internal items</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][0]</params>
+                                </step>
+                                <step>
+                                    <type>CHECK_REGEX_ERROR</type>
+                                    <params>(&quot;Status&quot;\s:\s&quot;Failure&quot;)
+\1</params>
+                                </step>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Response Data']</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} battery low charge level</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.ctl.bbu.lowcharge[{#CTLID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID batterry backup unit</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['BBU_Firmware_Status'][10]['Value']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.ctl.bbu.info[{$HV.ADDRESS},{#CTLID}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} battery need to replace</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.ctl.bbu.replace[{#CTLID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID batterry backup unit</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['BBU_Firmware_Status'][9]['Value']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.ctl.bbu.info[{$HV.ADDRESS},{#CTLID}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} battery serial number</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.ctl.bbu.sn[{#CTLID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID batterry backup unit</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['BBU_Design_Info'][4]['Value']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.ctl.bbu.info[{$HV.ADDRESS},{#CTLID}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} battery health status</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.ctl.bbu.state[{#CTLID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID batterry backup unit</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['BBU_Info'][4]['Value']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.ctl.bbu.info[{$HV.ADDRESS},{#CTLID}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} battery type</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.ctl.bbu.type[{#CTLID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID batterry backup unit</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['BBU_Info'][0]['Value']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.ctl.bbu.info[{$HV.ADDRESS},{#CTLID}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} battery presence</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.ctl.bbu[{#CTLID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID controllers</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][0]['Response Data']['HwCfg']['BBU']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.ctl.info[{$HV.ADDRESS},{#CTLID}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} cache size</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.ctl.cache[{#CTLID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID controllers</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][0]['Response Data']['HwCfg']['CacheVault Flash Size']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.ctl.info[{$HV.ADDRESS},{#CTLID}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} chip revision</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.ctl.chrev[{#CTLID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID controllers</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][0]['Response Data']['HwCfg']['ChipRevision']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.ctl.info[{$HV.ADDRESS},{#CTLID}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} cache vault need to replace</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.ctl.cv.replace[{#CTLID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID batterry backup unit</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Firmware_Status'][1]['Value']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.ctl.cvs.info[{$HV.ADDRESS},{#CTLID}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} cache vault serial number</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.ctl.cv.sn[{#CTLID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID batterry backup unit</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Design_Info'][1]['Value']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.ctl.cvs.info[{$HV.ADDRESS},{#CTLID}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} cache vault health status</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.ctl.cv.state[{#CTLID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID batterry backup unit</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Cachevault_Info'][2]['Value']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.ctl.cvs.info[{$HV.ADDRESS},{#CTLID}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} cache vault temp</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.ctl.cv.temp[{#CTLID}]</key>
+                            <delay>0</delay>
+                            <value_type>FLOAT</value_type>
+                            <units>°C</units>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID controllers</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Cachevault_Info'][1]['Value']</params>
+                                </step>
+                                <step>
+                                    <type>TRIM</type>
+                                    <params>C</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.ctl.cvs.info[{$HV.ADDRESS},{#CTLID}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} cache vault type</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.ctl.cv.type[{#CTLID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID batterry backup unit</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Cachevault_Info'][0]['Value']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.ctl.cvs.info[{$HV.ADDRESS},{#CTLID}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} cache vault info</name>
+                            <key>lsimr.ctl.cvs.info[{$HV.ADDRESS},{#CTLID}]</key>
+                            <delay>10m</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID X internal items</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][0]</params>
+                                </step>
+                                <step>
+                                    <type>CHECK_REGEX_ERROR</type>
+                                    <params>(&quot;Status&quot;\s:\s&quot;Failure&quot;)
+\1</params>
+                                </step>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Response Data']</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} hardware info</name>
+                            <key>lsimr.ctl.info[{$HV.ADDRESS},{#CTLID}]</key>
+                            <delay>10m</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID X internal items</name>
+                                </application>
+                            </applications>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} memory size</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.ctl.memory[{#CTLID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID controllers</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][0]['Response Data']['HwCfg']['On Board Memory Size']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>3h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.ctl.info[{$HV.ADDRESS},{#CTLID}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} model</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.ctl.model[{#CTLID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID controllers</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][0]['Response Data']['Basics']['Model']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.ctl.info[{$HV.ADDRESS},{#CTLID}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} chip temperature</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.ctl.roctemp[{#CTLID}]</key>
+                            <delay>0</delay>
+                            <value_type>FLOAT</value_type>
+                            <units>°C</units>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID controllers</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][0]['Response Data']['HwCfg']['ROC temperature(Degree Celsius)']</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.ctl.info[{$HV.ADDRESS},{#CTLID}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} serial number</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.ctl.sn[{#CTLID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID controllers</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][0]['Response Data']['Basics']['Serial Number']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.ctl.info[{$HV.ADDRESS},{#CTLID}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} health status</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.ctl.state[{#CTLID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID controllers</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][0]['Response Data']['Status']['Controller Status']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.ctl.info[{$HV.ADDRESS},{#CTLID}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} physical drives info</name>
+                            <key>lsimr.pd.info[{$HV.ADDRESS},{#CTLID}]</key>
+                            <delay>10m</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID X internal items</name>
+                                </application>
+                            </applications>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} virtual drives info</name>
+                            <key>lsimr.vd.info[{$HV.ADDRESS},{#CTLID}]</key>
+                            <delay>10m</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID X internal items</name>
+                                </application>
+                            </applications>
+                        </item_prototype>
+                    </item_prototypes>
+                    <lld_macro_paths>
+                        <lld_macro_path>
+                            <lld_macro>{#CTLID}</lld_macro>
+                            <path>$.Ctl</path>
+                        </lld_macro_path>
+                    </lld_macro_paths>
+                    <preprocessing>
+                        <step>
+                            <type>CHECK_JSON_ERROR</type>
+                            <params>$['Controllers'][0]['Command Status']['Detailed Status'][0]['ErrMsg']</params>
+                        </step>
+                        <step>
+                            <type>JSONPATH</type>
+                            <params>$['Controllers'][0]['Response Data']['System Overview']</params>
+                        </step>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>1h</params>
+                        </step>
+                    </preprocessing>
+                </discovery_rule>
+                <discovery_rule>
+                    <name>Physical drives discovery</name>
+                    <type>DEPENDENT</type>
+                    <key>lsimr.pd.lld</key>
+                    <delay>0</delay>
+                    <lifetime>1d</lifetime>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) drive info</name>
+                            <key>lsimr.pd.all.info[{$HV.ADDRESS},{#PDNAME}]</key>
+                            <delay>10m</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID X internal items</name>
+                                </application>
+                            </applications>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) drive group</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.pd.dg[{#PDID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID physical drives</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][{#CTLID}]['Response Data']['Drive Information'][{#CTLPDID}]['DG']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.pd.info[{$HV.ADDRESS}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) DID-Device ID</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.pd.did[{#PDID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID physical drives</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][{#CTLID}]['Response Data']['Drive Information'][{#CTLPDID}]['DID']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.pd.info[{$HV.ADDRESS}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) Enclosure Device ID : Slot No</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.pd.eid[{#PDID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID physical drives</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][{#CTLID}]['Response Data']['Drive Information'][{#CTLPDID}]['EID:Slt']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.pd.info[{$HV.ADDRESS}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) firmware</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.pd.fw[{#PDID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <description>Версия прошивки</description>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID physical drives</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][0]['Response Data']['Drive {#PDNAME} - Detailed Information']['Drive {#PDNAME} Device attributes']['Firmware Revision']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.pd.all.info[{$HV.ADDRESS},{#PDNAME}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) interface</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.pd.intf[{#PDID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID physical drives</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][{#CTLID}]['Response Data']['Drive Information'][{#CTLPDID}]['Intf']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.pd.info[{$HV.ADDRESS}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) media error count</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.pd.media.error.count[{#PDID}]</key>
+                            <delay>0</delay>
+                            <description>Количество ошибок S.M.A.R.T, связанные с диском&#13;
+&#13;
+Означает, что физический сектор вышел из строя и обычно обнаруживается во время чтения приложения или очистки массива.&#13;
+&#13;
+В этом контексте «поврежденный сектор» означает, что физический диск не смог прочитать исходный сектор, что привело к возврату ошибки на контроллер RAID. Тот факт, что сам жесткий диск может пометить сектор как «переназначаемый», прозрачен для RAID-контроллера, который просто попытается перезаписать тот же сектор, используя данные из другой зеркальной ветви/паритета. Если эта перезапись не удалась (что означает отсутствие свободных секторов на самом диске), диск обычно помечается как неисправный.</description>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID physical drives</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][0]['Response Data']['Drive {#PDNAME} - Detailed Information']['Drive {#PDNAME} State']['Media Error Count']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.pd.all.info[{$HV.ADDRESS},{#PDNAME}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) media type</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.pd.med[{#PDID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID physical drives</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][{#CTLID}]['Response Data']['Drive Information'][{#CTLPDID}]['Med']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.pd.info[{$HV.ADDRESS}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) model</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.pd.model[{#PDID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID physical drives</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][{#CTLID}]['Response Data']['Drive Information'][{#CTLPDID}]['Model']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.pd.info[{$HV.ADDRESS}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) name</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.pd.name[{#PDID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID physical drives</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][{#CTLID}]['Response Data']['Drive Information'][{#CTLPDID}]['EID:Slt']</params>
+                                </step>
+                                <step>
+                                    <type>REGEX</type>
+                                    <params>^(.*)$
+{#PDNAME}</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.pd.info[{$HV.ADDRESS}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) other error count</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.pd.other.error.count[{#PDID}]</key>
+                            <delay>0</delay>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID physical drives</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][0]['Response Data']['Drive {#PDNAME} - Detailed Information']['Drive {#PDNAME} State']['Other Error Count']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.pd.all.info[{$HV.ADDRESS},{#PDNAME}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) protection info</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.pd.pi[{#PDID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <description>Функция защиты данных - это дополнительный метод предотвращения повреждения данных за счет обеспечения сквозной целостности данных на всем пути ввода-вывода от приложения к диску.</description>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID physical drives</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][{#CTLID}]['Response Data']['Drive Information'][{#CTLPDID}]['PI']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.pd.info[{$HV.ADDRESS}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) predictive failure count</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.pd.predictive.failure.count[{#PDID}]</key>
+                            <delay>0</delay>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID physical drives</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][0]['Response Data']['Drive {#PDNAME} - Detailed Information']['Drive {#PDNAME} State']['Predictive Failure Count']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.pd.all.info[{$HV.ADDRESS},{#PDNAME}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) self encryptive drive</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.pd.sed[{#PDID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID physical drives</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][{#CTLID}]['Response Data']['Drive Information'][{#CTLPDID}]['SED']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.pd.info[{$HV.ADDRESS}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) sector size</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.pd.sesz[{#PDID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID physical drives</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][{#CTLID}]['Response Data']['Drive Information'][{#CTLPDID}]['SeSz']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.pd.info[{$HV.ADDRESS}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) shield counter</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.pd.shield.counter[{#PDID}]</key>
+                            <delay>0</delay>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID physical drives</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][0]['Response Data']['Drive {#PDNAME} - Detailed Information']['Drive {#PDNAME} State']['Shield Counter']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.pd.all.info[{$HV.ADDRESS},{#PDNAME}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) size</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.pd.size[{#PDID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID physical drives</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][{#CTLID}]['Response Data']['Drive Information'][{#CTLPDID}]['Size']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.pd.info[{$HV.ADDRESS}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) S.M.A.R.T alert flag</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.pd.smart.alert.flag[{#PDID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID physical drives</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][0]['Response Data']['Drive {#PDNAME} - Detailed Information']['Drive {#PDNAME} State']['S.M.A.R.T alert flagged by drive']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.pd.all.info[{$HV.ADDRESS},{#PDNAME}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) serial number</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.pd.sn[{#PDID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <description>Серийный номер</description>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID physical drives</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][0]['Response Data']['Drive {#PDNAME} - Detailed Information']['Drive {#PDNAME} Device attributes']['SN']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.pd.all.info[{$HV.ADDRESS},{#PDNAME}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) spun</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.pd.spun[{#PDID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID physical drives</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][{#CTLID}]['Response Data']['Drive Information'][{#CTLPDID}]['Sp']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                                <step>
+                                    <type>JAVASCRIPT</type>
+                                    <params>switch(value)
+{
+case 'Onln':
+value='Online';
+break;
+case 'UGood':
+value='Unconfigured-Good';
+break;
+case 'UBad':
+value='Unconfigured-Bad';
+break;
+case 'Msng':
+value='Missing';
+break;
+case 'Offln':
+value='Offline';
+break;
+case 'GHS':
+value='Global Hot Spare';
+break;
+case 'DHS':
+value='Dedicated Hot Spare';
+break;
+case 'Rbld':
+value='Rebuild';
+break;
+case 'U':
+value='Up';
+break;
+case 'D':
+value='Down/PowerSave';
+break;
+case 'T':
+value='Transition';
+break;
+case 'F':
+value='Foreign';
+break;
+case 'UGUnsp':
+value='Unsupported';
+break;
+case 'UGShld':
+value='UnConfigured shielded';
+break;
+case 'HSPShld':
+value='Hotspare shielded';
+break;
+case 'CFShld':
+value='Configured shielded';
+break;
+case 'Cpybck':
+value='CopyBack';
+break;
+case 'CBShld':
+value='Copyback Shielded';
+break;
+}
+return value</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.pd.info[{$HV.ADDRESS}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) health status</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.pd.state[{#PDID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID physical drives</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][{#CTLID}]['Response Data']['Drive Information'][{#CTLPDID}]['State']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                                <step>
+                                    <type>JAVASCRIPT</type>
+                                    <params>switch(value)
+{
+case 'Onln':
+value='Online';
+break;
+case 'UGood':
+value='Unconfigured-Good';
+break;
+case 'UBad':
+value='Unconfigured-Bad';
+break;
+case 'Msng':
+value='Missing';
+break;
+case 'Offln':
+value='Offline';
+break;
+case 'GHS':
+value='Global Hot Spare';
+break;
+case 'DHS':
+value='Dedicated Hot Spare';
+break;
+case 'Rbld':
+value='Rebuild';
+break;
+case 'U':
+value='Up';
+break;
+case 'D':
+value='Down/PowerSave';
+break;
+case 'T':
+value='Transition';
+break;
+case 'F':
+value='Foreign';
+break;
+case 'UGUnsp':
+value='Unsupported';
+break;
+case 'UGShld':
+value='UnConfigured shielded';
+break;
+case 'HSPShld':
+value='Hotspare shielded';
+break;
+case 'CFShld':
+value='Configured shielded';
+break;
+case 'Cpybck':
+value='CopyBack';
+break;
+case 'CBShld':
+value='Copyback Shielded';
+break;
+}
+return value</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.pd.info[{$HV.ADDRESS}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) temperature</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.pd.temp[{#PDID}]</key>
+                            <delay>0</delay>
+                            <units>°C</units>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID physical drives</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][0]['Response Data']['Drive {#PDNAME} - Detailed Information']['Drive {#PDNAME} State']['Drive Temperature']</params>
+                                </step>
+                                <step>
+                                    <type>REGEX</type>
+                                    <params>^(.+)C.*$
+\1</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.pd.all.info[{$HV.ADDRESS},{#PDNAME}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) type</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.pd.type[{#PDID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID physical drives</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][{#CTLID}]['Response Data']['Drive Information'][{#CTLPDID}]['Type']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                                <step>
+                                    <type>JAVASCRIPT</type>
+                                    <params>switch(value)
+{
+case 'Onln':
+value='Online';
+break;
+case 'UGood':
+value='Unconfigured-Good';
+break;
+case 'UBad':
+value='Unconfigured-Bad';
+break;
+case 'Msng':
+value='Missing';
+break;
+case 'Offln':
+value='Offline';
+break;
+case 'GHS':
+value='Global Hot Spare';
+break;
+case 'DHS':
+value='Dedicated Hot Spare';
+break;
+case 'Rbld':
+value='Rebuild';
+break;
+case 'U':
+value='Up';
+break;
+case 'D':
+value='Down/PowerSave';
+break;
+case 'T':
+value='Transition';
+break;
+case 'F':
+value='Foreign';
+break;
+case 'UGUnsp':
+value='Unsupported';
+break;
+case 'UGShld':
+value='UnConfigured shielded';
+break;
+case 'HSPShld':
+value='Hotspare shielded';
+break;
+case 'CFShld':
+value='Configured shielded';
+break;
+case 'Cpybck':
+value='CopyBack';
+break;
+case 'CBShld':
+value='Copyback Shielded';
+break;
+}
+return value</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.pd.info[{$HV.ADDRESS}]</key>
+                            </master_item>
+                        </item_prototype>
+                    </item_prototypes>
+                    <master_item>
+                        <key>lsimr.pd.info[{$HV.ADDRESS}]</key>
+                    </master_item>
+                    <lld_macro_paths>
+                        <lld_macro_path>
+                            <lld_macro>{#CTLID}</lld_macro>
+                            <path>$.CTLID</path>
+                        </lld_macro_path>
+                        <lld_macro_path>
+                            <lld_macro>{#CTLPDID}</lld_macro>
+                            <path>$.CTLPDID</path>
+                        </lld_macro_path>
+                        <lld_macro_path>
+                            <lld_macro>{#EID}</lld_macro>
+                            <path>$.['EID:Slt']</path>
+                        </lld_macro_path>
+                        <lld_macro_path>
+                            <lld_macro>{#PDID}</lld_macro>
+                            <path>$.PDID</path>
+                        </lld_macro_path>
+                        <lld_macro_path>
+                            <lld_macro>{#PDNAME}</lld_macro>
+                            <path>$.PDNAME</path>
+                        </lld_macro_path>
+                    </lld_macro_paths>
+                    <preprocessing>
+                        <step>
+                            <type>JAVASCRIPT</type>
+                            <params>var i=0;
+var NeedData = [];
+var JsonValue = JSON.parse(value);
+var Controllers = JsonValue.Controllers;
+for (var keyC in Controllers) {
+	if (JsonValue.Controllers[keyC]['Response Data'] &amp;&amp; JsonValue.Controllers[keyC]['Response Data']['Drive Information']) {
+		var DriveInformation = JsonValue.Controllers[keyC]['Response Data']['Drive Information'];
+		for (var key in DriveInformation) {       
+ 		 	JsonValue.Controllers[keyC]['Response Data']['Drive Information'][key]['PDID'] = i;
+ 		 	JsonValue.Controllers[keyC]['Response Data']['Drive Information'][key]['PDNAME'] = '/c' + keyC + '/e' + JsonValue.Controllers[keyC]['Response Data']['Drive Information'][key]['EID:Slt'].replace(':','/s');
+ 		 	JsonValue.Controllers[keyC]['Response Data']['Drive Information'][key]['CTLPDID'] = key;
+ 		 	JsonValue.Controllers[keyC]['Response Data']['Drive Information'][key]['CTLID'] = keyC;
+ 		 	NeedData[i] = JsonValue.Controllers[keyC]['Response Data']['Drive Information'][key];
+ 		 	i = i + 1;
+		}
+	}
+}
+return JSON.stringify(NeedData)</params>
+                        </step>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>1h</params>
+                        </step>
+                    </preprocessing>
+                </discovery_rule>
+                <discovery_rule>
+                    <name>Virtual drives discovery</name>
+                    <type>DEPENDENT</type>
+                    <key>lsimr.vd.lld</key>
+                    <delay>0</delay>
+                    <lifetime>1d</lifetime>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} virtual drive {#LDNAME} ({#LDID}) cache</name>
+                            <type>DEPENDENT</type>
+                            <key>lsi.vd.cache[{&quot;#LDID&quot;}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID virtual drives</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][{#CTLID}]['Response Data']['{#LDID}'][0]['Cache']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.vd.info[{$HV.ADDRESS}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} virtual drive {#LDNAME} ({#LDID}) access</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.vd.access[{&quot;#LDID&quot;}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID virtual drives</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][{#CTLID}]['Response Data']['{#LDID}'][0]['Access']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.vd.info[{$HV.ADDRESS}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} virtual drive {#LDNAME} ({#LDID}) cache cade</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.vd.cac[{&quot;#LDID&quot;}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID virtual drives</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][{#CTLID}]['Response Data']['{#LDID}'][0]['Cac']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.vd.info[{$HV.ADDRESS}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} virtual drive {#LDNAME} ({#LDID}) consistency</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.vd.consist[{&quot;#LDID&quot;}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID virtual drives</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][{#CTLID}]['Response Data']['{#LDID}'][0]['Consist']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.vd.info[{$HV.ADDRESS}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} virtual drive {#LDNAME} ({#LDID}) DG/VD</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.vd.dgvd[{&quot;#LDID&quot;}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID virtual drives</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][{#CTLID}]['Response Data']['{#LDID}'][0]['DG/VD']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.vd.info[{$HV.ADDRESS}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} virtual drive {#LDNAME} ({#LDID}) level</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.vd.level[{&quot;#LDID&quot;}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID virtual drives</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][{#CTLID}]['Response Data']['{#LDID}'][0]['TYPE']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.vd.info[{$HV.ADDRESS}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} virtual drive {#LDNAME} ({#LDID}) scheduled check consistency</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.vd.scc[&quot;{#LDID}&quot;]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID virtual drives</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][{#CTLID}]['Response Data']['{#LDID}'][0]['sCC']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.vd.info[{$HV.ADDRESS}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} virtual drive {#LDNAME} ({#LDID}) health status</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.vd.size[&quot;{#LDID}&quot;]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID virtual drives</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][{#CTLID}]['Response Data']['{#LDID}'][0]['Size']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.vd.info[{$HV.ADDRESS}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} virtual drive {#LDNAME} ({#LDID}) state</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.vd.state[&quot;{#LDID}&quot;]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID virtual drives</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][{#CTLID}]['Response Data']['{#LDID}'][0]['State']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                                <step>
+                                    <type>JAVASCRIPT</type>
+                                    <params>switch(value)
+{
+case 'Optl':
+value='Optimal';
+break;
+case 'OfLn':
+value='Offline';
+break;
+case 'Pdgd':
+value='Partially degraded';
+break;
+case 'Dgrd':
+value='Degraded';
+break;
+case 'Rec':
+value='Recovery';
+break;
+}
+return value</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.vd.info[{$HV.ADDRESS}]</key>
+                            </master_item>
+                        </item_prototype>
+                    </item_prototypes>
+                    <master_item>
+                        <key>lsimr.vd.info[{$HV.ADDRESS}]</key>
+                    </master_item>
+                    <lld_macro_paths>
+                        <lld_macro_path>
+                            <lld_macro>{#CTLID}</lld_macro>
+                            <path>$.CTLID</path>
+                        </lld_macro_path>
+                        <lld_macro_path>
+                            <lld_macro>{#LDID}</lld_macro>
+                            <path>$.LDID</path>
+                        </lld_macro_path>
+                        <lld_macro_path>
+                            <lld_macro>{#LDNAME}</lld_macro>
+                            <path>$.Name</path>
+                        </lld_macro_path>
+                    </lld_macro_paths>
+                    <preprocessing>
+                        <step>
+                            <type>JAVASCRIPT</type>
+                            <params>var i=0;
+var NeedData = [];
+var JsonValue = JSON.parse(value);
+var Controllers = JsonValue.Controllers;
+for (var keyC in Controllers) {
+  var ResponseStatus=JsonValue.Controllers[keyC]['Command Status']['Status'];
+  if (ResponseStatus.match(/Success/g)) {  	
+		var ResponseData = JsonValue.Controllers[keyC]['Response Data'];
+		for (var key in ResponseData) {
+			if (key.match(/\/c\d{1,}\/v\d{1,}/g)) {
+	 		 	JsonValue.Controllers[keyC]['Response Data'][key][0]['LDID'] = key;
+	 		 	JsonValue.Controllers[keyC]['Response Data'][key][0]['CTLID'] = keyC;
+	 		 	NeedData[i] = JsonValue.Controllers[keyC]['Response Data'][key][0];
+	 		 	i = i + 1;
+			}
+    }
+  	
+  }
+}
+return JSON.stringify(NeedData)</params>
+                        </step>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>1h</params>
+                        </step>
+                    </preprocessing>
+                </discovery_rule>
+            </discovery_rules>
+            <macros>
+                <macro>
+                    <macro>{$HV.ADDRESS}</macro>
+                    <value>192.168.22.70</value>
+                </macro>
+            </macros>
+        </template>
+    </templates>
+</zabbix_export>
