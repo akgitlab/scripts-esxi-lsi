@@ -64,7 +64,7 @@ UserParameter=lsimr.pd.ne.all.info[*],sudo /etc/zabbix/scripts/lsimr-pd-info-all
 
 7) Разрешаем пользователю zabbix выполнение скриптов без запроса пароля
 
-shell> sudo nano /etc/sudoers
+shell> sudo visudo
 
 ... 
 # User privilege specification
@@ -76,6 +76,10 @@ zabbix ALL=(ALL) NOPASSWD: /etc/zabbix/scripts/lsimr-pd-info-ne.sh
 zabbix ALL=(ALL) NOPASSWD: /etc/zabbix/scripts/lsimr-pd-info.sh 
 zabbix ALL=(ALL) NOPASSWD: /etc/zabbix/scripts/lsimr-vd-info.sh 
 ...
+
+Предупреждение! Никогда не редактируйте этот файл в обычном текстовом редакторе! Всегда используйте для этой цели только команду visudo.
+Неправильный синтаксис файла /etc/sudoers может нарушить работу системы и сделать невозможным получение повышенного уровня привилегий,
+поэтому очень важно использовать для его редактирования команду visudo.
 
 
 8) Копируем скрипты из репозитория на сервер и делаем их исполняемыми
