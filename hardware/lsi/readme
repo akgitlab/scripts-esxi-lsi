@@ -39,7 +39,7 @@ shell> vi /etc/security/access.conf
 или в /etc/rc.local.d/local.sh (если ESXi 5.1+).
 
 
-4) Копируем публичный ключ с сервера мониторинга на хост (при первой авторизации потребуется ввести пароль пользователя zabbix)
+4) Копируем публичный ключ с сервера мониторинга на хост (для авторизации потребуется ввести пароль пользователя root на esxi)
 
 shell> sudo scp /var/lib/zabbix/.ssh/id_rsa.pub root@{HOST.IP}:/etc/ssh/keys-zabbix/authorized_keys
 
