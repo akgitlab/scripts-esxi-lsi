@@ -1,6 +1,6 @@
 #!/bin/bash
 #Collecting data from LSI MegaRAID controller
-#Andrey Kuznetsov, 2022.02.10
+#Andrey Kuznetsov, 2022.02.20
 
 # Get variables
 HOST=$1
