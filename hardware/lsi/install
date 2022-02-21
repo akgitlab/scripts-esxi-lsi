@@ -68,22 +68,27 @@ zabbix ALL=(ALL) NOPASSWD: /etc/zabbix/scripts/lsimr-vd-info.sh
 8) Копируем скрипты из репозитория на сервер и делаем их исполняемыми
 
 shell> sudo svn checkout https://github.com/akgitlab/templates/trunk/hardware/lsi/scripts /etc/zabbix/scripts
-shell> sudo find /etc/zabbix/scripts -iname "*.sh" -exec bash -c 'chmod +x "$0"' {} \;
+shell> sudo find /etc/zabbix/scripts -type f -name "*.sh" -exec chmod +x {} \;
 
 
 9) Перезапускаем агента мониторинга
 
-shell> sudo service zabbix-agent restart
+shell> sudo systemctl zabbix-agent restart
 
 
 10) Скачиваем шаблон из репозитория и импортируем его
 https://raw.githubusercontent.com/akgitlab/templates/main/hardware/lsi/template/lsimr_json_lld_v1.xml
 
 
-11) Создаем узел сети на сервере мониторинга и назначаем шаблон
+11) Присоединяем шаблон к шаблону Template VMWare Hypervisor
 
 
-12) Правим макрос, содержащий IP адрес хотста
+12) Для корректной работы в папке со скриптами создаем файл с UID и IP гипервизоров
+
+shell> sudo nano /etc/zabbix/scripts/lsimr-hosts-list.txt
+
+UID XXX.XXX.XX.XX
+
 
 
 В соответствии с таймингами обнаружения данные начнут собираться в течение 1 часа.
