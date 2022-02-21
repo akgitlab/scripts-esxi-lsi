@@ -1,11 +1,12 @@
 #!/bin/bash
+
 # Collecting data from LSI MegaRAID controller
 # Andrey Kuznetsov, 2022.02.20
 
 # Get variables
 HVUID=$1
 CTLID=$2
-HOST=$(grep -w $HVUID /etc/zabbix/scripts/lsimr-hosts-info | awk '{print $NF}')
+HOST=$(grep -w $HVUID /etc/zabbix/scripts/lsimr-hosts-list.txt | awk '{print $NF}')
 
 # Get controller id
 # If the controller id is not passed, we display all the information
