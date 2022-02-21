@@ -6,7 +6,7 @@
 # Get variables
 HVUID=$1
 CTLID=$2
-HOST=$(grep -w $HVUID /etc/zabbix/scripts/lsimr-hosts-list.txt | awk '{print $NF}')
+HOST=$(grep -w $HVUID /etc/zabbix/scripts/hosts-uid-map.txt | awk '{print $NF}')
 
 # Get controller id
 # If the controller id is not passed, we display all the information
