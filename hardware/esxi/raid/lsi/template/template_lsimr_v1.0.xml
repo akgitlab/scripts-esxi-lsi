@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>4.4</version>
-    <date>2022-02-19T05:58:14Z</date>
+    <date>2022-02-23T03:39:17Z</date>
     <groups>
         <group>
             <name>Templates/Server hardware</name>
@@ -24,37 +24,37 @@
                     <name>LSI MegaRAID controllers</name>
                 </application>
                 <application>
+                    <name>LSI MegaRAID logical drives</name>
+                </application>
+                <application>
                     <name>LSI MegaRAID physical drives</name>
                 </application>
                 <application>
-                    <name>LSI MegaRAID virtual drives</name>
-                </application>
-                <application>
-                    <name>LSI MegaRAID X internal items</name>
+                    <name>Raw data</name>
                 </application>
             </applications>
             <items>
                 <item>
-                    <name>All physical drives info</name>
-                    <key>lsimr.pd.info[{$HV.ADDRESS}]</key>
-                    <delay>1h</delay>
-                    <trends>0</trends>
-                    <value_type>TEXT</value_type>
-                    <applications>
-                        <application>
-                            <name>LSI MegaRAID X internal items</name>
-                        </application>
-                    </applications>
-                </item>
-                <item>
-                    <name>All virtual drives info</name>
-                    <key>lsimr.vd.info[{$HV.ADDRESS}]</key>
+                    <name>Physical drives raw data</name>
+                    <key>lsimr.pd.info[{HOST.HOST}]</key>
                     <delay>10m</delay>
                     <trends>0</trends>
                     <value_type>TEXT</value_type>
                     <applications>
                         <application>
-                            <name>LSI MegaRAID X internal items</name>
+                            <name>Raw data</name>
+                        </application>
+                    </applications>
+                </item>
+                <item>
+                    <name>Logical drives raw data</name>
+                    <key>lsimr.vd.info[{HOST.HOST}]</key>
+                    <delay>10m</delay>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <applications>
+                        <application>
+                            <name>Raw data</name>
                         </application>
                     </applications>
                 </item>
@@ -62,18 +62,72 @@
             <discovery_rules>
                 <discovery_rule>
                     <name>Controllers discovery</name>
-                    <key>lsimr.ctl.info[{$HV.ADDRESS}]</key>
+                    <key>lsimr.ctl.info[{HOST.HOST}]</key>
                     <delay>1h</delay>
                     <item_prototypes>
                         <item_prototype>
-                            <name>Controller #{#CTLID} backup battery info</name>
-                            <key>lsimr.ctl.bbu.info[{$HV.ADDRESS},{#CTLID}]</key>
+                            <name>Controller #{#CTLID} alarm switch state</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.ctl.ass[{#CTLID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <description>Состояние переключателя тревоги</description>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID controllers</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][0]['Response Data']['HwCfg']['Alarm']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.ctl.info[{HOST.HOST},{#CTLID}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} / battery average time to full</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.ctl.bbu.attf[{#CTLID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <description>Время до полного заряда резервной батареи</description>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID batterry backup unit</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['BBU_Capacity_Info'][6]['Value']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.ctl.bbu.info[{HOST.HOST},{#CTLID}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} backup battery raw data</name>
+                            <key>lsimr.ctl.bbu.info[{HOST.HOST},{#CTLID}]</key>
                             <delay>10m</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
                             <applications>
                                 <application>
-                                    <name>LSI MegaRAID X internal items</name>
+                                    <name>Raw data</name>
                                 </application>
                             </applications>
                             <preprocessing>
@@ -93,12 +147,13 @@
                             </preprocessing>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} battery low charge level</name>
+                            <name>Controller #{#CTLID} / battery low charge level</name>
                             <type>DEPENDENT</type>
                             <key>lsimr.ctl.bbu.lowcharge[{#CTLID}]</key>
                             <delay>0</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
+                            <description>Уровень заряда резервной батареи</description>
                             <applications>
                                 <application>
                                     <name>LSI MegaRAID batterry backup unit</name>
@@ -115,16 +170,32 @@
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.ctl.bbu.info[{$HV.ADDRESS},{#CTLID}]</key>
+                                <key>lsimr.ctl.bbu.info[{HOST.HOST},{#CTLID}]</key>
                             </master_item>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{str(No)}=0 and {strlen()}&gt;0</expression>
+                                    <name>На контроллере #{#CTLID} низкий уровень заряда резервной батареи</name>
+                                    <opdata>{ITEM.LASTVALUE1}</opdata>
+                                    <priority>AVERAGE</priority>
+                                    <manual_close>YES</manual_close>
+                                    <tags>
+                                        <tag>
+                                            <tag>hv</tag>
+                                            <value>ctrl</value>
+                                        </tag>
+                                    </tags>
+                                </trigger_prototype>
+                            </trigger_prototypes>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} battery need to replace</name>
+                            <name>Controller #{#CTLID} / battery need to replace</name>
                             <type>DEPENDENT</type>
                             <key>lsimr.ctl.bbu.replace[{#CTLID}]</key>
                             <delay>0</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
+                            <description>Необходимость замены резервной батареи</description>
                             <applications>
                                 <application>
                                     <name>LSI MegaRAID batterry backup unit</name>
@@ -141,16 +212,59 @@
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.ctl.bbu.info[{$HV.ADDRESS},{#CTLID}]</key>
+                                <key>lsimr.ctl.bbu.info[{HOST.HOST},{#CTLID}]</key>
+                            </master_item>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>({str(No)}=0 and {strlen()}&gt;0)</expression>
+                                    <name>Резервной батарее контроллера #{#CTLID} требуется замена</name>
+                                    <opdata>{ITEM.LASTVALUE1}</opdata>
+                                    <priority>AVERAGE</priority>
+                                    <manual_close>YES</manual_close>
+                                    <tags>
+                                        <tag>
+                                            <tag>hv</tag>
+                                            <value>ctrl</value>
+                                        </tag>
+                                    </tags>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} / battery relative state of charge</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.ctl.bbu.rsoch[{#CTLID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <description>Относительное состояние заряда резервной батареи</description>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID batterry backup unit</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['BBU_Capacity_Info'][0]['Value']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.ctl.bbu.info[{HOST.HOST},{#CTLID}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} battery serial number</name>
+                            <name>Controller #{#CTLID} / battery serial number</name>
                             <type>DEPENDENT</type>
                             <key>lsimr.ctl.bbu.sn[{#CTLID}]</key>
                             <delay>0</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
+                            <description>Серийный номер резервной батареи</description>
                             <applications>
                                 <application>
                                     <name>LSI MegaRAID batterry backup unit</name>
@@ -167,16 +281,31 @@
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.ctl.bbu.info[{$HV.ADDRESS},{#CTLID}]</key>
+                                <key>lsimr.ctl.bbu.info[{HOST.HOST},{#CTLID}]</key>
                             </master_item>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>({diff()}=1 and {strlen()}&gt;0)</expression>
+                                    <name>На контроллере #{#CTLID} произведена замена резервной батареи</name>
+                                    <priority>INFO</priority>
+                                    <manual_close>YES</manual_close>
+                                    <tags>
+                                        <tag>
+                                            <tag>hv</tag>
+                                            <value>ctrl</value>
+                                        </tag>
+                                    </tags>
+                                </trigger_prototype>
+                            </trigger_prototypes>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} battery health status</name>
+                            <name>Controller #{#CTLID} / battery current state</name>
                             <type>DEPENDENT</type>
                             <key>lsimr.ctl.bbu.state[{#CTLID}]</key>
                             <delay>0</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
+                            <description>Состояние здоровья резервной батареи</description>
                             <applications>
                                 <application>
                                     <name>LSI MegaRAID batterry backup unit</name>
@@ -193,16 +322,63 @@
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.ctl.bbu.info[{$HV.ADDRESS},{#CTLID}]</key>
+                                <key>lsimr.ctl.bbu.info[{HOST.HOST},{#CTLID}]</key>
+                            </master_item>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>({str(Optimal)}=0 and {strlen()}&gt;0)</expression>
+                                    <name>На контроллере #{#CTLID} ухудшилось состояние здоровья резервной батареи</name>
+                                    <opdata>{ITEM.LASTVALUE}</opdata>
+                                    <priority>AVERAGE</priority>
+                                    <manual_close>YES</manual_close>
+                                    <tags>
+                                        <tag>
+                                            <tag>hv</tag>
+                                            <value>ctrl</value>
+                                        </tag>
+                                    </tags>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} / battery temperature</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.ctl.bbu.temp[{#CTLID}]</key>
+                            <delay>0</delay>
+                            <value_type>FLOAT</value_type>
+                            <units>°C</units>
+                            <description>Температура резервной батареи</description>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID batterry backup unit</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['BBU_Info'][3]['Value']</params>
+                                </step>
+                                <step>
+                                    <type>TRIM</type>
+                                    <params>C</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.ctl.bbu.info[{HOST.HOST},{#CTLID}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} battery type</name>
+                            <name>Controller #{#CTLID} / battery type</name>
                             <type>DEPENDENT</type>
                             <key>lsimr.ctl.bbu.type[{#CTLID}]</key>
                             <delay>0</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
+                            <description>Тип резервной батареи</description>
                             <applications>
                                 <application>
                                     <name>LSI MegaRAID batterry backup unit</name>
@@ -219,16 +395,17 @@
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.ctl.bbu.info[{$HV.ADDRESS},{#CTLID}]</key>
+                                <key>lsimr.ctl.bbu.info[{HOST.HOST},{#CTLID}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} battery presence</name>
+                            <name>Controller #{#CTLID} onboard battery presence</name>
                             <type>DEPENDENT</type>
                             <key>lsimr.ctl.bbu[{#CTLID}]</key>
                             <delay>0</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
+                            <description>Наличие резервной батареи</description>
                             <applications>
                                 <application>
                                     <name>LSI MegaRAID controllers</name>
@@ -245,16 +422,60 @@
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.ctl.info[{$HV.ADDRESS},{#CTLID}]</key>
+                                <key>lsimr.ctl.info[{HOST.HOST},{#CTLID}]</key>
+                            </master_item>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{str(Present)}=0</expression>
+                                    <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                                    <recovery_expression>{str(Present)}=1</recovery_expression>
+                                    <name>На контроллере #{#CTLID} отсутствует резервная батарея</name>
+                                    <opdata>{ITEM.LASTVALUE1}</opdata>
+                                    <priority>AVERAGE</priority>
+                                    <tags>
+                                        <tag>
+                                            <tag>hv</tag>
+                                            <value>ctrl</value>
+                                        </tag>
+                                    </tags>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} onboard port count on backend</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.ctl.bpc[{#CTLID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <description>Количество интерфейсных портов внутри</description>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID controllers</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][0]['Response Data']['HwCfg']['Backend Port Count']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.ctl.info[{HOST.HOST},{#CTLID}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} cache size</name>
+                            <name>Controller #{#CTLID} cache vault size</name>
                             <type>DEPENDENT</type>
                             <key>lsimr.ctl.cache[{#CTLID}]</key>
                             <delay>0</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
+                            <description>Размер кэша контроллера</description>
                             <applications>
                                 <application>
                                     <name>LSI MegaRAID controllers</name>
@@ -271,7 +492,7 @@
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.ctl.info[{$HV.ADDRESS},{#CTLID}]</key>
+                                <key>lsimr.ctl.info[{HOST.HOST},{#CTLID}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
@@ -281,6 +502,7 @@
                             <delay>0</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
+                            <description>Ревизия чипа</description>
                             <applications>
                                 <application>
                                     <name>LSI MegaRAID controllers</name>
@@ -297,16 +519,69 @@
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.ctl.info[{$HV.ADDRESS},{#CTLID}]</key>
+                                <key>lsimr.ctl.info[{HOST.HOST},{#CTLID}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} cache vault need to replace</name>
+                            <name>Controller #{#CTLID} current size of cache cade</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.ctl.csocc[{#CTLID}]</key>
+                            <delay>0</delay>
+                            <units>GB</units>
+                            <description>Используется для повышения производительности произвольного чтения виртуальных дисков на основе жесткого диска</description>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID controllers</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][0]['Response Data']['HwCfg']['Current Size of CacheCade (GB)']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>3h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.ctl.info[{HOST.HOST},{#CTLID}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} current size of FW cache</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.ctl.csofw[{#CTLID}]</key>
+                            <delay>0</delay>
+                            <units>MB</units>
+                            <description>Текущий размер кэш-памяти FW</description>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID controllers</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][0]['Response Data']['HwCfg']['Current Size of FW Cache (MB)']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>3h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.ctl.info[{HOST.HOST},{#CTLID}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} / cache vault need to replace</name>
                             <type>DEPENDENT</type>
                             <key>lsimr.ctl.cv.replace[{#CTLID}]</key>
                             <delay>0</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
+                            <description>Необходимость замены</description>
                             <applications>
                                 <application>
                                     <name>LSI MegaRAID batterry backup unit</name>
@@ -323,11 +598,11 @@
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.ctl.cvs.info[{$HV.ADDRESS},{#CTLID}]</key>
+                                <key>lsimr.ctl.cvs.info[{HOST.HOST},{#CTLID}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} cache vault serial number</name>
+                            <name>Controller #{#CTLID} / cache vault serial number</name>
                             <type>DEPENDENT</type>
                             <key>lsimr.ctl.cv.sn[{#CTLID}]</key>
                             <delay>0</delay>
@@ -349,11 +624,11 @@
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.ctl.cvs.info[{$HV.ADDRESS},{#CTLID}]</key>
+                                <key>lsimr.ctl.cvs.info[{HOST.HOST},{#CTLID}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} cache vault health status</name>
+                            <name>Controller #{#CTLID} / cache vault current state</name>
                             <type>DEPENDENT</type>
                             <key>lsimr.ctl.cv.state[{#CTLID}]</key>
                             <delay>0</delay>
@@ -375,11 +650,11 @@
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.ctl.cvs.info[{$HV.ADDRESS},{#CTLID}]</key>
+                                <key>lsimr.ctl.cvs.info[{HOST.HOST},{#CTLID}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} cache vault temp</name>
+                            <name>Controller #{#CTLID} cache vault temperature</name>
                             <type>DEPENDENT</type>
                             <key>lsimr.ctl.cv.temp[{#CTLID}]</key>
                             <delay>0</delay>
@@ -401,11 +676,85 @@
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.ctl.cvs.info[{$HV.ADDRESS},{#CTLID}]</key>
+                                <key>lsimr.ctl.cvs.info[{HOST.HOST},{#CTLID}]</key>
                             </master_item>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last(#1)}&gt;{$CTRL_BBU_TEMP_AVERAGE}</expression>
+                                    <name>Температура резервной батареи контроллера #{#CTLID} превышает {$CTRL_BBU_TEMP_AVERAGE} °C</name>
+                                    <opdata>{ITEM.LASTVALUE1}</opdata>
+                                    <priority>HIGH</priority>
+                                    <tags>
+                                        <tag>
+                                            <tag>hv</tag>
+                                            <value>ctrl</value>
+                                        </tag>
+                                    </tags>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <expression>{last(#1)}&gt;{$CTRL_BBU_TEMP_CRIT}</expression>
+                                    <name>Температура резервной батареи контроллера #{#CTLID} превышает {$CTRL_BBU_TEMP_CRIT} °C</name>
+                                    <opdata>{ITEM.LASTVALUE1}</opdata>
+                                    <priority>DISASTER</priority>
+                                    <tags>
+                                        <tag>
+                                            <tag>hv</tag>
+                                            <value>ctrl</value>
+                                        </tag>
+                                    </tags>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <expression>{last(#1)}&gt;{$CTRL_BBU_TEMP_WARNING}</expression>
+                                    <name>Температура резервной батареи контроллера #{#CTLID} превышает {$CTRL_BBU_TEMP_WARNING} °C</name>
+                                    <opdata>{ITEM.LASTVALUE1}</opdata>
+                                    <priority>AVERAGE</priority>
+                                    <tags>
+                                        <tag>
+                                            <tag>hv</tag>
+                                            <value>ctrl</value>
+                                        </tag>
+                                    </tags>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <expression>{last(#1)}&gt;{$CTRL_ROC_TEMP_AVERAGE}</expression>
+                                    <name>Температура чипа контроллера #{#CTLID} превышает {$CTRL_ROC_TEMP_AVERAGE} °C</name>
+                                    <opdata>{ITEM.LASTVALUE1}</opdata>
+                                    <priority>HIGH</priority>
+                                    <tags>
+                                        <tag>
+                                            <tag>hv</tag>
+                                            <value>ctrl</value>
+                                        </tag>
+                                    </tags>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <expression>{last(#1)}&gt;{$CTRL_ROC_TEMP_CRIT}</expression>
+                                    <name>Температура чипа контроллера #{#CTLID} превышает {$CTRL_ROC_TEMP_CRIT} °C</name>
+                                    <opdata>{ITEM.LASTVALUE1}</opdata>
+                                    <priority>DISASTER</priority>
+                                    <tags>
+                                        <tag>
+                                            <tag>hv</tag>
+                                            <value>ctrl</value>
+                                        </tag>
+                                    </tags>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <expression>{last(#1)}&gt;{$CTRL_ROC_TEMP_WARNING}</expression>
+                                    <name>Температура чипа контроллера #{#CTLID} превышает {$CTRL_ROC_TEMP_WARNING} °C</name>
+                                    <opdata>{ITEM.LASTVALUE1}</opdata>
+                                    <priority>AVERAGE</priority>
+                                    <tags>
+                                        <tag>
+                                            <tag>hv</tag>
+                                            <value>ctrl</value>
+                                        </tag>
+                                    </tags>
+                                </trigger_prototype>
+                            </trigger_prototypes>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} cache vault type</name>
+                            <name>Controller #{#CTLID} / cache vault type</name>
                             <type>DEPENDENT</type>
                             <key>lsimr.ctl.cv.type[{#CTLID}]</key>
                             <delay>0</delay>
@@ -427,18 +776,18 @@
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.ctl.cvs.info[{$HV.ADDRESS},{#CTLID}]</key>
+                                <key>lsimr.ctl.cvs.info[{HOST.HOST},{#CTLID}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} cache vault info</name>
-                            <key>lsimr.ctl.cvs.info[{$HV.ADDRESS},{#CTLID}]</key>
+                            <name>Controller #{#CTLID} cache vault raw data</name>
+                            <key>lsimr.ctl.cvs.info[{HOST.HOST},{#CTLID}]</key>
                             <delay>10m</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
                             <applications>
                                 <application>
-                                    <name>LSI MegaRAID X internal items</name>
+                                    <name>Raw data</name>
                                 </application>
                             </applications>
                             <preprocessing>
@@ -458,16 +807,59 @@
                             </preprocessing>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} hardware info</name>
-                            <key>lsimr.ctl.info[{$HV.ADDRESS},{#CTLID}]</key>
+                            <name>Controller #{#CTLID} onboard port count on frontend</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.ctl.fepc[{#CTLID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <description>Количество интерфейсных портов снаружи</description>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID controllers</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][0]['Response Data']['HwCfg']['Front End Port Count']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.ctl.info[{HOST.HOST},{#CTLID}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} hardware raw data</name>
+                            <key>lsimr.ctl.info[{HOST.HOST},{#CTLID}]</key>
                             <delay>10m</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
                             <applications>
                                 <application>
-                                    <name>LSI MegaRAID X internal items</name>
+                                    <name>Raw data</name>
                                 </application>
                             </applications>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{nodata(3h)}=1</expression>
+                                    <name>Отсутствуют данные о состоянии контроллеров и дисков массива</name>
+                                    <priority>WARNING</priority>
+                                    <description>Результат:&#13;
+1 - если нет полученных данных за указанный период времени&#13;
+0 - в противном случае</description>
+                                    <tags>
+                                        <tag>
+                                            <tag>hv</tag>
+                                            <value>data</value>
+                                        </tag>
+                                    </tags>
+                                </trigger_prototype>
+                            </trigger_prototypes>
                         </item_prototype>
                         <item_prototype>
                             <name>Controller #{#CTLID} memory size</name>
@@ -476,6 +868,7 @@
                             <delay>0</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
+                            <description>Объем памяти</description>
                             <applications>
                                 <application>
                                     <name>LSI MegaRAID controllers</name>
@@ -492,7 +885,7 @@
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.ctl.info[{$HV.ADDRESS},{#CTLID}]</key>
+                                <key>lsimr.ctl.info[{HOST.HOST},{#CTLID}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
@@ -518,7 +911,34 @@
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.ctl.info[{$HV.ADDRESS},{#CTLID}]</key>
+                                <key>lsimr.ctl.info[{HOST.HOST},{#CTLID}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} onboard expander presence</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.ctl.obe[{#CTLID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <description>Наличие встроенного расширителя</description>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID controllers</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][0]['Response Data']['HwCfg']['On Board Expander']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.ctl.info[{HOST.HOST},{#CTLID}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
@@ -540,7 +960,34 @@
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.ctl.info[{$HV.ADDRESS},{#CTLID}]</key>
+                                <key>lsimr.ctl.info[{HOST.HOST},{#CTLID}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} onboard serial debugger presence</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.ctl.sd[{#CTLID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <description>Наличие отладчика</description>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID controllers</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][0]['Response Data']['HwCfg']['Serial Debugger']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.ctl.info[{HOST.HOST},{#CTLID}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
@@ -550,6 +997,7 @@
                             <delay>0</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
+                            <description>Серийный номер контроллера</description>
                             <applications>
                                 <application>
                                     <name>LSI MegaRAID controllers</name>
@@ -566,16 +1014,17 @@
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.ctl.info[{$HV.ADDRESS},{#CTLID}]</key>
+                                <key>lsimr.ctl.info[{HOST.HOST},{#CTLID}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} health status</name>
+                            <name>Controller #{#CTLID} current state</name>
                             <type>DEPENDENT</type>
                             <key>lsimr.ctl.state[{#CTLID}]</key>
                             <delay>0</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
+                            <description>Текущее состояние контроллера</description>
                             <applications>
                                 <application>
                                     <name>LSI MegaRAID controllers</name>
@@ -592,30 +1041,84 @@
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.ctl.info[{$HV.ADDRESS},{#CTLID}]</key>
+                                <key>lsimr.ctl.info[{HOST.HOST},{#CTLID}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} physical drives info</name>
-                            <key>lsimr.pd.info[{$HV.ADDRESS},{#CTLID}]</key>
+                            <name>Controller #{#CTLID} onboard temp sensor for chip presence</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.ctl.tsfch[{#CTLID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <description>Наличие температурного сенсора чипа контроллера</description>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID controllers</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][0]['Response Data']['HwCfg']['Temperature Sensor for ROC']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.ctl.info[{HOST.HOST},{#CTLID}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} onboard temp sensor for controller presence</name>
+                            <type>DEPENDENT</type>
+                            <key>lsimr.ctl.tsfc[{#CTLID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <description>Наличие температурного сенсора контроллера</description>
+                            <applications>
+                                <application>
+                                    <name>LSI MegaRAID controllers</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$['Controllers'][0]['Response Data']['HwCfg']['Temperature Sensor for Controller']</params>
+                                </step>
+                                <step>
+                                    <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                                    <params>1h</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>lsimr.ctl.info[{HOST.HOST},{#CTLID}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Controller #{#CTLID} physical drives raw data</name>
+                            <key>lsimr.pd.info[{HOST.HOST},{#CTLID}]</key>
                             <delay>10m</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
                             <applications>
                                 <application>
-                                    <name>LSI MegaRAID X internal items</name>
+                                    <name>Raw data</name>
                                 </application>
                             </applications>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} virtual drives info</name>
-                            <key>lsimr.vd.info[{$HV.ADDRESS},{#CTLID}]</key>
+                            <name>Controller #{#CTLID} virtual drives raw data</name>
+                            <key>lsimr.vd.info[{HOST.HOST},{#CTLID}]</key>
                             <delay>10m</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
                             <applications>
                                 <application>
-                                    <name>LSI MegaRAID X internal items</name>
+                                    <name>Raw data</name>
                                 </application>
                             </applications>
                         </item_prototype>
@@ -649,24 +1152,25 @@
                     <lifetime>1d</lifetime>
                     <item_prototypes>
                         <item_prototype>
-                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) drive info</name>
-                            <key>lsimr.pd.all.info[{$HV.ADDRESS},{#PDNAME}]</key>
-                            <delay>10m</delay>
+                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) drive raw data</name>
+                            <key>lsimr.pd.all.info[{HOST.HOST},{#PDNAME}]</key>
+                            <delay>5m</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
                             <applications>
                                 <application>
-                                    <name>LSI MegaRAID X internal items</name>
+                                    <name>Raw data</name>
                                 </application>
                             </applications>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) drive group</name>
+                            <name>Controller #{#CTLID} / physical drive #{#PDID}: ({#EID}) drive group</name>
                             <type>DEPENDENT</type>
                             <key>lsimr.pd.dg[{#PDID}]</key>
                             <delay>0</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
+                            <description>Группа физического диска</description>
                             <applications>
                                 <application>
                                     <name>LSI MegaRAID physical drives</name>
@@ -683,16 +1187,17 @@
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.pd.info[{$HV.ADDRESS}]</key>
+                                <key>lsimr.pd.info[{HOST.HOST}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) DID-Device ID</name>
+                            <name>Controller #{#CTLID} / physical drive #{#PDID}: ({#EID}) device id</name>
                             <type>DEPENDENT</type>
                             <key>lsimr.pd.did[{#PDID}]</key>
                             <delay>0</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
+                            <description>Идентификатор устройства в MegaRAID. Эта ассоциация будет сохраняться в течение всего срока службы контроллера, если только она не будет очищена или пока пул идентификаторов не будет исчерпан.</description>
                             <applications>
                                 <application>
                                     <name>LSI MegaRAID physical drives</name>
@@ -709,16 +1214,17 @@
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.pd.info[{$HV.ADDRESS}]</key>
+                                <key>lsimr.pd.info[{HOST.HOST}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) Enclosure Device ID : Slot No</name>
+                            <name>Controller #{#CTLID} / physical drive #{#PDID}: ({#EID}) enclosure device slot number</name>
                             <type>DEPENDENT</type>
                             <key>lsimr.pd.eid[{#PDID}]</key>
                             <delay>0</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
+                            <description>Номер слота физического диска</description>
                             <applications>
                                 <application>
                                     <name>LSI MegaRAID physical drives</name>
@@ -735,17 +1241,17 @@
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.pd.info[{$HV.ADDRESS}]</key>
+                                <key>lsimr.pd.info[{HOST.HOST}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) firmware</name>
+                            <name>Controller #{#CTLID} / physical drive #{#PDID}: ({#EID}) current firmware version</name>
                             <type>DEPENDENT</type>
                             <key>lsimr.pd.fw[{#PDID}]</key>
                             <delay>0</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
-                            <description>Версия прошивки</description>
+                            <description>Версия прошивки физического диска</description>
                             <applications>
                                 <application>
                                     <name>LSI MegaRAID physical drives</name>
@@ -762,16 +1268,17 @@
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.pd.all.info[{$HV.ADDRESS},{#PDNAME}]</key>
+                                <key>lsimr.pd.all.info[{HOST.HOST},{#PDNAME}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) interface</name>
+                            <name>Controller #{#CTLID} / physical drive #{#PDID}: ({#EID}) interface type</name>
                             <type>DEPENDENT</type>
                             <key>lsimr.pd.intf[{#PDID}]</key>
                             <delay>0</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
+                            <description>Интерфейс физического диска</description>
                             <applications>
                                 <application>
                                     <name>LSI MegaRAID physical drives</name>
@@ -788,19 +1295,15 @@
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.pd.info[{$HV.ADDRESS}]</key>
+                                <key>lsimr.pd.info[{HOST.HOST}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) media error count</name>
+                            <name>Controller #{#CTLID} / physical drive #{#PDID}: ({#EID}) media error count</name>
                             <type>DEPENDENT</type>
                             <key>lsimr.pd.media.error.count[{#PDID}]</key>
                             <delay>0</delay>
-                            <description>Количество ошибок S.M.A.R.T, связанные с диском&#13;
-&#13;
-Означает, что физический сектор вышел из строя и обычно обнаруживается во время чтения приложения или очистки массива.&#13;
-&#13;
-В этом контексте «поврежденный сектор» означает, что физический диск не смог прочитать исходный сектор, что привело к возврату ошибки на контроллер RAID. Тот факт, что сам жесткий диск может пометить сектор как «переназначаемый», прозрачен для RAID-контроллера, который просто попытается перезаписать тот же сектор, используя данные из другой зеркальной ветви/паритета. Если эта перезапись не удалась (что означает отсутствие свободных секторов на самом диске), диск обычно помечается как неисправный.</description>
+                            <description>Количество ошибок носителя</description>
                             <applications>
                                 <application>
                                     <name>LSI MegaRAID physical drives</name>
@@ -817,16 +1320,31 @@
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.pd.all.info[{$HV.ADDRESS},{#PDNAME}]</key>
+                                <key>lsimr.pd.all.info[{HOST.HOST},{#PDNAME}]</key>
                             </master_item>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{change()}&gt;0</expression>
+                                    <name>На диске #{#PDID} [{#EID}] контроллера #{#CTLID} обнаружены ошибки носителя</name>
+                                    <opdata>Кол-во ошибок: {ITEM.LASTVALUE1}</opdata>
+                                    <priority>WARNING</priority>
+                                    <tags>
+                                        <tag>
+                                            <tag>hv</tag>
+                                            <value>ctrl</value>
+                                        </tag>
+                                    </tags>
+                                </trigger_prototype>
+                            </trigger_prototypes>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) media type</name>
+                            <name>Controller #{#CTLID} / physical drive #{#PDID}: ({#EID}) media type</name>
                             <type>DEPENDENT</type>
                             <key>lsimr.pd.med[{#PDID}]</key>
                             <delay>0</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
+                            <description>Тип диска</description>
                             <applications>
                                 <application>
                                     <name>LSI MegaRAID physical drives</name>
@@ -843,16 +1361,17 @@
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.pd.info[{$HV.ADDRESS}]</key>
+                                <key>lsimr.pd.info[{HOST.HOST}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) model</name>
+                            <name>Controller #{#CTLID} / physical drive #{#PDID}: ({#EID}) model</name>
                             <type>DEPENDENT</type>
                             <key>lsimr.pd.model[{#PDID}]</key>
                             <delay>0</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
+                            <description>Модель физического диска</description>
                             <applications>
                                 <application>
                                     <name>LSI MegaRAID physical drives</name>
@@ -869,16 +1388,17 @@
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.pd.info[{$HV.ADDRESS}]</key>
+                                <key>lsimr.pd.info[{HOST.HOST}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) name</name>
+                            <name>Controller #{#CTLID} / physical drive #{#PDID}: ({#EID}) name</name>
                             <type>DEPENDENT</type>
                             <key>lsimr.pd.name[{#PDID}]</key>
                             <delay>0</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
+                            <description>Имя физического диска</description>
                             <applications>
                                 <application>
                                     <name>LSI MegaRAID physical drives</name>
@@ -900,14 +1420,15 @@
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.pd.info[{$HV.ADDRESS}]</key>
+                                <key>lsimr.pd.info[{HOST.HOST}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) other error count</name>
+                            <name>Controller #{#CTLID} / physical drive #{#PDID}: ({#EID}) other error count</name>
                             <type>DEPENDENT</type>
                             <key>lsimr.pd.other.error.count[{#PDID}]</key>
                             <delay>0</delay>
+                            <description>Прочее количество ошибок</description>
                             <applications>
                                 <application>
                                     <name>LSI MegaRAID physical drives</name>
@@ -924,11 +1445,25 @@
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.pd.all.info[{$HV.ADDRESS},{#PDNAME}]</key>
+                                <key>lsimr.pd.all.info[{HOST.HOST},{#PDNAME}]</key>
                             </master_item>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{change()}&gt;0</expression>
+                                    <name>На диске #{#PDID} [{#EID}] контроллера #{#CTLID} обнаружены ошибки</name>
+                                    <opdata>Кол-во ошибок: {ITEM.LASTVALUE1}</opdata>
+                                    <priority>WARNING</priority>
+                                    <tags>
+                                        <tag>
+                                            <tag>hv</tag>
+                                            <value>ctrl</value>
+                                        </tag>
+                                    </tags>
+                                </trigger_prototype>
+                            </trigger_prototypes>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) protection info</name>
+                            <name>Controller #{#CTLID} / physical drive #{#PDID}: ({#EID}) protection info</name>
                             <type>DEPENDENT</type>
                             <key>lsimr.pd.pi[{#PDID}]</key>
                             <delay>0</delay>
@@ -951,14 +1486,15 @@
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.pd.info[{$HV.ADDRESS}]</key>
+                                <key>lsimr.pd.info[{HOST.HOST}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) predictive failure count</name>
+                            <name>Controller #{#CTLID} / physical drive #{#PDID}: ({#EID}) predictive failure count</name>
                             <type>DEPENDENT</type>
                             <key>lsimr.pd.predictive.failure.count[{#PDID}]</key>
                             <delay>0</delay>
+                            <description>Прогнозируемое количество отказов</description>
                             <applications>
                                 <application>
                                     <name>LSI MegaRAID physical drives</name>
@@ -975,16 +1511,31 @@
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.pd.all.info[{$HV.ADDRESS},{#PDNAME}]</key>
+                                <key>lsimr.pd.all.info[{HOST.HOST},{#PDNAME}]</key>
                             </master_item>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&gt;0</expression>
+                                    <name>Прогнозируемое количество отказов диска #{#PDID} [{#EID}] на контроллере #{#CTLID} увеличилось</name>
+                                    <opdata>Кол-во отказов: {ITEM.LASTVALUE1}</opdata>
+                                    <priority>AVERAGE</priority>
+                                    <tags>
+                                        <tag>
+                                            <tag>hv</tag>
+                                            <value>ctrl</value>
+                                        </tag>
+                                    </tags>
+                                </trigger_prototype>
+                            </trigger_prototypes>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) self encryptive drive</name>
+                            <name>Controller #{#CTLID} / physical drive #{#PDID}: ({#EID}) self encryptive drive</name>
                             <type>DEPENDENT</type>
                             <key>lsimr.pd.sed[{#PDID}]</key>
                             <delay>0</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
+                            <description>Шифрование физического диска</description>
                             <applications>
                                 <application>
                                     <name>LSI MegaRAID physical drives</name>
@@ -1001,16 +1552,17 @@
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.pd.info[{$HV.ADDRESS}]</key>
+                                <key>lsimr.pd.info[{HOST.HOST}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) sector size</name>
+                            <name>Controller #{#CTLID} / physical drive #{#PDID}: ({#EID}) sector size</name>
                             <type>DEPENDENT</type>
                             <key>lsimr.pd.sesz[{#PDID}]</key>
                             <delay>0</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
+                            <description>Размер сектора физического диска</description>
                             <applications>
                                 <application>
                                     <name>LSI MegaRAID physical drives</name>
@@ -1027,14 +1579,17 @@
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.pd.info[{$HV.ADDRESS}]</key>
+                                <key>lsimr.pd.info[{HOST.HOST}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) shield counter</name>
+                            <name>Controller #{#CTLID} / physical drive #{#PDID}: ({#EID}) shield counter</name>
                             <type>DEPENDENT</type>
                             <key>lsimr.pd.shield.counter[{#PDID}]</key>
                             <delay>0</delay>
+                            <description>Количество переключений диска в состояние защиты (в случае&#13;
+сбоя физического диска он переводится в состояние защиты, а&#13;
+контроллер MegaRAID запускает диагностику, чтобы определить, действительно ли диск вышел из строя или его можно восстановить).</description>
                             <applications>
                                 <application>
                                     <name>LSI MegaRAID physical drives</name>
@@ -1051,16 +1606,17 @@
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.pd.all.info[{$HV.ADDRESS},{#PDNAME}]</key>
+                                <key>lsimr.pd.all.info[{HOST.HOST},{#PDNAME}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) size</name>
+                            <name>Controller #{#CTLID} / physical drive #{#PDID}: ({#EID}) size</name>
                             <type>DEPENDENT</type>
                             <key>lsimr.pd.size[{#PDID}]</key>
                             <delay>0</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
+                            <description>Объем физического диска</description>
                             <applications>
                                 <application>
                                     <name>LSI MegaRAID physical drives</name>
@@ -1077,16 +1633,17 @@
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.pd.info[{$HV.ADDRESS}]</key>
+                                <key>lsimr.pd.info[{HOST.HOST}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) S.M.A.R.T alert flag</name>
+                            <name>Controller #{#CTLID} / physical drive #{#PDID}: ({#EID}) self monitoring alert flag</name>
                             <type>DEPENDENT</type>
                             <key>lsimr.pd.smart.alert.flag[{#PDID}]</key>
                             <delay>0</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
+                            <description>Сообщение об оценке состояния жёсткого диска встроенной аппаратурой самодиагностики</description>
                             <applications>
                                 <application>
                                     <name>LSI MegaRAID physical drives</name>
@@ -1103,17 +1660,31 @@
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.pd.all.info[{$HV.ADDRESS},{#PDNAME}]</key>
+                                <key>lsimr.pd.all.info[{HOST.HOST},{#PDNAME}]</key>
                             </master_item>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{str(No)}=0 and {strlen()}&gt;0</expression>
+                                    <name>Оценка состояния диска #{#PDID} [{#EID}] контроллера #{#CTLID} изменилась</name>
+                                    <opdata>Флаг оповещения: {ITEM.LASTVALUE1}</opdata>
+                                    <priority>HIGH</priority>
+                                    <tags>
+                                        <tag>
+                                            <tag>hv</tag>
+                                            <value>ctrl</value>
+                                        </tag>
+                                    </tags>
+                                </trigger_prototype>
+                            </trigger_prototypes>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) serial number</name>
+                            <name>Controller #{#CTLID} / physical drive #{#PDID}: ({#EID}) serial number</name>
                             <type>DEPENDENT</type>
                             <key>lsimr.pd.sn[{#PDID}]</key>
                             <delay>0</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
-                            <description>Серийный номер</description>
+                            <description>Серийный номер физического диска</description>
                             <applications>
                                 <application>
                                     <name>LSI MegaRAID physical drives</name>
@@ -1130,16 +1701,17 @@
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.pd.all.info[{$HV.ADDRESS},{#PDNAME}]</key>
+                                <key>lsimr.pd.all.info[{HOST.HOST},{#PDNAME}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) spun</name>
+                            <name>Controller #{#CTLID} / physical drive #{#PDID}: ({#EID}) spun</name>
                             <type>DEPENDENT</type>
                             <key>lsimr.pd.spun[{#PDID}]</key>
                             <delay>0</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
+                            <description>Текущее состояние диска: показывает Up, когда диск раскручивается и Down, когда привод заглох (диски SSD и другие диски, которые никогда не останавливаются, всегда в состоянии Up).</description>
                             <applications>
                                 <application>
                                     <name>LSI MegaRAID physical drives</name>
@@ -1217,16 +1789,17 @@ return value</params>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.pd.info[{$HV.ADDRESS}]</key>
+                                <key>lsimr.pd.info[{HOST.HOST}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) health status</name>
+                            <name>Controller #{#CTLID} / physical drive #{#PDID}: ({#EID}) current state</name>
                             <type>DEPENDENT</type>
                             <key>lsimr.pd.state[{#PDID}]</key>
                             <delay>0</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
+                            <description>Состояние здоровья физического диска</description>
                             <applications>
                                 <application>
                                     <name>LSI MegaRAID physical drives</name>
@@ -1304,15 +1877,37 @@ return value</params>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.pd.info[{$HV.ADDRESS}]</key>
+                                <key>lsimr.pd.info[{HOST.HOST}]</key>
                             </master_item>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>({str(Unconfigured-Bad)}=1 &#13;
+or {str(Unconfigured-Good)}=1 &#13;
+or {str(Missing)}=1 &#13;
+or {str(Offline)}=1 &#13;
+or {str(Foreign)}=1) &#13;
+and {strlen()}&gt;0</expression>
+                                    <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                                    <recovery_expression>{str(Unconfigured-Good)}=1 or {str(Online)}=1</recovery_expression>
+                                    <name>Состояние диска #{#PDID} [{#EID}] на контроллере #{#CTLID} изменилось</name>
+                                    <opdata>Текущее состояние: {ITEM.LASTVALUE}</opdata>
+                                    <priority>HIGH</priority>
+                                    <tags>
+                                        <tag>
+                                            <tag>hv</tag>
+                                            <value>ctrl</value>
+                                        </tag>
+                                    </tags>
+                                </trigger_prototype>
+                            </trigger_prototypes>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) temperature</name>
+                            <name>Controller #{#CTLID} / physical drive #{#PDID}: ({#EID}) temperature</name>
                             <type>DEPENDENT</type>
                             <key>lsimr.pd.temp[{#PDID}]</key>
                             <delay>0</delay>
                             <units>°C</units>
+                            <description>Температура физического диска</description>
                             <applications>
                                 <application>
                                     <name>LSI MegaRAID physical drives</name>
@@ -1334,16 +1929,17 @@ return value</params>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.pd.all.info[{$HV.ADDRESS},{#PDNAME}]</key>
+                                <key>lsimr.pd.all.info[{HOST.HOST},{#PDNAME}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} physical drive {#PDID} ({#EID}) type</name>
+                            <name>Controller #{#CTLID} / physical drive #{#PDID}: ({#EID}) type</name>
                             <type>DEPENDENT</type>
                             <key>lsimr.pd.type[{#PDID}]</key>
                             <delay>0</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
+                            <description>Тип физического диска</description>
                             <applications>
                                 <application>
                                     <name>LSI MegaRAID physical drives</name>
@@ -1421,12 +2017,12 @@ return value</params>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.pd.info[{$HV.ADDRESS}]</key>
+                                <key>lsimr.pd.info[{HOST.HOST}]</key>
                             </master_item>
                         </item_prototype>
                     </item_prototypes>
                     <master_item>
-                        <key>lsimr.pd.info[{$HV.ADDRESS}]</key>
+                        <key>lsimr.pd.info[{HOST.HOST}]</key>
                     </master_item>
                     <lld_macro_paths>
                         <lld_macro_path>
@@ -1479,22 +2075,22 @@ return JSON.stringify(NeedData)</params>
                     </preprocessing>
                 </discovery_rule>
                 <discovery_rule>
-                    <name>Virtual drives discovery</name>
+                    <name>Logical drives discovery</name>
                     <type>DEPENDENT</type>
                     <key>lsimr.vd.lld</key>
                     <delay>0</delay>
                     <lifetime>1d</lifetime>
                     <item_prototypes>
                         <item_prototype>
-                            <name>Controller #{#CTLID} virtual drive {#LDNAME} ({#LDID}) cache</name>
+                            <name>Controller #{#CTLID} / virtual drive #{#LDNAME}: ({#LDID}) cache</name>
                             <type>DEPENDENT</type>
-                            <key>lsi.vd.cache[{&quot;#LDID&quot;}]</key>
+                            <key>lsi.vd.cache[{#LDID}]</key>
                             <delay>0</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
                             <applications>
                                 <application>
-                                    <name>LSI MegaRAID virtual drives</name>
+                                    <name>LSI MegaRAID logical drives</name>
                                 </application>
                             </applications>
                             <preprocessing>
@@ -1508,19 +2104,19 @@ return JSON.stringify(NeedData)</params>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.vd.info[{$HV.ADDRESS}]</key>
+                                <key>lsimr.vd.info[{HOST.HOST}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} virtual drive {#LDNAME} ({#LDID}) access</name>
+                            <name>Controller #{#CTLID} / virtual drive #{#LDNAME}: ({#LDID}) access</name>
                             <type>DEPENDENT</type>
-                            <key>lsimr.vd.access[{&quot;#LDID&quot;}]</key>
+                            <key>lsimr.vd.access[{#LDID}]</key>
                             <delay>0</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
                             <applications>
                                 <application>
-                                    <name>LSI MegaRAID virtual drives</name>
+                                    <name>LSI MegaRAID logical drives</name>
                                 </application>
                             </applications>
                             <preprocessing>
@@ -1534,19 +2130,19 @@ return JSON.stringify(NeedData)</params>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.vd.info[{$HV.ADDRESS}]</key>
+                                <key>lsimr.vd.info[{HOST.HOST}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} virtual drive {#LDNAME} ({#LDID}) cache cade</name>
+                            <name>Controller #{#CTLID} / virtual drive #{#LDNAME}: ({#LDID}) cache cade</name>
                             <type>DEPENDENT</type>
-                            <key>lsimr.vd.cac[{&quot;#LDID&quot;}]</key>
+                            <key>lsimr.vd.cac[{#LDID}]</key>
                             <delay>0</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
                             <applications>
                                 <application>
-                                    <name>LSI MegaRAID virtual drives</name>
+                                    <name>LSI MegaRAID logical drives</name>
                                 </application>
                             </applications>
                             <preprocessing>
@@ -1560,19 +2156,19 @@ return JSON.stringify(NeedData)</params>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.vd.info[{$HV.ADDRESS}]</key>
+                                <key>lsimr.vd.info[{HOST.HOST}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} virtual drive {#LDNAME} ({#LDID}) consistency</name>
+                            <name>Controller #{#CTLID} / virtual drive #{#LDNAME}: ({#LDID}) consistency</name>
                             <type>DEPENDENT</type>
-                            <key>lsimr.vd.consist[{&quot;#LDID&quot;}]</key>
+                            <key>lsimr.vd.consist[{#LDID}]</key>
                             <delay>0</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
                             <applications>
                                 <application>
-                                    <name>LSI MegaRAID virtual drives</name>
+                                    <name>LSI MegaRAID logical drives</name>
                                 </application>
                             </applications>
                             <preprocessing>
@@ -1586,19 +2182,19 @@ return JSON.stringify(NeedData)</params>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.vd.info[{$HV.ADDRESS}]</key>
+                                <key>lsimr.vd.info[{HOST.HOST}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} virtual drive {#LDNAME} ({#LDID}) DG/VD</name>
+                            <name>Controller #{#CTLID} / virtual drive #{#LDNAME}: ({#LDID}) drive / volume groups</name>
                             <type>DEPENDENT</type>
-                            <key>lsimr.vd.dgvd[{&quot;#LDID&quot;}]</key>
+                            <key>lsimr.vd.dgvd[{#LDID}]</key>
                             <delay>0</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
                             <applications>
                                 <application>
-                                    <name>LSI MegaRAID virtual drives</name>
+                                    <name>LSI MegaRAID logical drives</name>
                                 </application>
                             </applications>
                             <preprocessing>
@@ -1612,19 +2208,19 @@ return JSON.stringify(NeedData)</params>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.vd.info[{$HV.ADDRESS}]</key>
+                                <key>lsimr.vd.info[{HOST.HOST}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} virtual drive {#LDNAME} ({#LDID}) level</name>
+                            <name>Controller #{#CTLID} / virtual drive #{#LDNAME}: ({#LDID}) level</name>
                             <type>DEPENDENT</type>
-                            <key>lsimr.vd.level[{&quot;#LDID&quot;}]</key>
+                            <key>lsimr.vd.level[{#LDID}]</key>
                             <delay>0</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
                             <applications>
                                 <application>
-                                    <name>LSI MegaRAID virtual drives</name>
+                                    <name>LSI MegaRAID logical drives</name>
                                 </application>
                             </applications>
                             <preprocessing>
@@ -1638,19 +2234,19 @@ return JSON.stringify(NeedData)</params>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.vd.info[{$HV.ADDRESS}]</key>
+                                <key>lsimr.vd.info[{HOST.HOST}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} virtual drive {#LDNAME} ({#LDID}) scheduled check consistency</name>
+                            <name>Controller #{#CTLID} / virtual drive #{#LDNAME}: ({#LDID}) scheduled check consistency</name>
                             <type>DEPENDENT</type>
-                            <key>lsimr.vd.scc[&quot;{#LDID}&quot;]</key>
+                            <key>lsimr.vd.scc[{#LDID}]</key>
                             <delay>0</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
                             <applications>
                                 <application>
-                                    <name>LSI MegaRAID virtual drives</name>
+                                    <name>LSI MegaRAID logical drives</name>
                                 </application>
                             </applications>
                             <preprocessing>
@@ -1664,19 +2260,19 @@ return JSON.stringify(NeedData)</params>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.vd.info[{$HV.ADDRESS}]</key>
+                                <key>lsimr.vd.info[{HOST.HOST}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} virtual drive {#LDNAME} ({#LDID}) health status</name>
+                            <name>Controller #{#CTLID} / virtual drive #{#LDNAME}: ({#LDID}) size</name>
                             <type>DEPENDENT</type>
-                            <key>lsimr.vd.size[&quot;{#LDID}&quot;]</key>
+                            <key>lsimr.vd.size[{#LDID}]</key>
                             <delay>0</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
                             <applications>
                                 <application>
-                                    <name>LSI MegaRAID virtual drives</name>
+                                    <name>LSI MegaRAID logical drives</name>
                                 </application>
                             </applications>
                             <preprocessing>
@@ -1690,19 +2286,19 @@ return JSON.stringify(NeedData)</params>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.vd.info[{$HV.ADDRESS}]</key>
+                                <key>lsimr.vd.info[{HOST.HOST}]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
-                            <name>Controller #{#CTLID} virtual drive {#LDNAME} ({#LDID}) state</name>
+                            <name>Controller #{#CTLID} / virtual drive #{#LDNAME}: ({#LDID}) current state</name>
                             <type>DEPENDENT</type>
-                            <key>lsimr.vd.state[&quot;{#LDID}&quot;]</key>
+                            <key>lsimr.vd.state[{#LDID}]</key>
                             <delay>0</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
                             <applications>
                                 <application>
-                                    <name>LSI MegaRAID virtual drives</name>
+                                    <name>LSI MegaRAID logical drives</name>
                                 </application>
                             </applications>
                             <preprocessing>
@@ -1738,12 +2334,12 @@ return value</params>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>lsimr.vd.info[{$HV.ADDRESS}]</key>
+                                <key>lsimr.vd.info[{HOST.HOST}]</key>
                             </master_item>
                         </item_prototype>
                     </item_prototypes>
                     <master_item>
-                        <key>lsimr.vd.info[{$HV.ADDRESS}]</key>
+                        <key>lsimr.vd.info[{HOST.HOST}]</key>
                     </master_item>
                     <lld_macro_paths>
                         <lld_macro_path>
@@ -1792,8 +2388,49 @@ return JSON.stringify(NeedData)</params>
             </discovery_rules>
             <macros>
                 <macro>
-                    <macro>{$HV.ADDRESS}</macro>
-                    <value>192.168.22.70</value>
+                    <macro>{$CTRL_BBU_TEMP_AVERAGE}</macro>
+                    <value>45</value>
+                    <description>Значение в °C</description>
+                </macro>
+                <macro>
+                    <macro>{$CTRL_BBU_TEMP_CRIT}</macro>
+                    <value>60</value>
+                    <description>Значение в °C</description>
+                </macro>
+                <macro>
+                    <macro>{$CTRL_BBU_TEMP_WARNING}</macro>
+                    <value>40</value>
+                    <description>Значение в °C</description>
+                </macro>
+                <macro>
+                    <macro>{$CTRL_PD_TEMP_AVERAGE}</macro>
+                    <value>50</value>
+                    <description>Значение в °C</description>
+                </macro>
+                <macro>
+                    <macro>{$CTRL_PD_TEMP_CRIT}</macro>
+                    <value>60</value>
+                    <description>Значение в °C</description>
+                </macro>
+                <macro>
+                    <macro>{$CTRL_PD_TEMP_WARNING}</macro>
+                    <value>45</value>
+                    <description>Значение в °C</description>
+                </macro>
+                <macro>
+                    <macro>{$CTRL_ROC_TEMP_AVERAGE}</macro>
+                    <value>80</value>
+                    <description>Значение в °C</description>
+                </macro>
+                <macro>
+                    <macro>{$CTRL_ROC_TEMP_CRIT}</macro>
+                    <value>90</value>
+                    <description>Значение в °C</description>
+                </macro>
+                <macro>
+                    <macro>{$CTRL_ROC_TEMP_WARNING}</macro>
+                    <value>70</value>
+                    <description>Значение в °C</description>
                 </macro>
             </macros>
         </template>
