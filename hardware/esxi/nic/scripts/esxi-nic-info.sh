@@ -19,7 +19,7 @@ HOST=$(grep -w $HVUID /etc/zabbix/scripts/hosts-uid-map.txt | awk '{print $NF}')
        echo "error: Not a number" >&2; exit 1
     else
 # We form the data of the received controller
-        ADAPSTR="ssh -i /var/lib/zabbix/.ssh/id_rsa zabbix@$HOST 'esxcli --debug --formatter=json network nic list'"
+        ADAPSTR="ssh -i /var/lib/zabbix/.ssh/id_rsa zabbix@$HOST 'esxcli --debug --formatter=json network nic get -n $NICID'"
         echo $ADAPSTR | bash
     fi
 fi
