@@ -11,7 +11,7 @@ HOST=$(grep -w $HVUID /etc/zabbix/scripts/hosts-uid-map.txt | awk '{print $NF}')
 # Get controller id
 # If the controller id is not passed, we display all the information
     if [[ $ADAPID = "" ]]; then
-       echo "ssh -i /var/lib/zabbix/.ssh/id_rsa zabbix@$HOST 'esxcli --debug --formatter=json system version get'" | bash
+       echo "ssh -i /var/lib/zabbix/.ssh/id_rsa zabbix@$HOST 'esxcli --debug --formatter=json network nic list'" | bash
     else
 # Integer test value of a variable
     re='^[0-9]+$'
@@ -19,7 +19,7 @@ HOST=$(grep -w $HVUID /etc/zabbix/scripts/hosts-uid-map.txt | awk '{print $NF}')
        echo "error: Not a number" >&2; exit 1
     else
 # We form the data of the received controller
-        ADAPSTR="ssh -i /var/lib/zabbix/.ssh/id_rsa zabbix@$HOST '/opt/lsi/storcli/storcli /c$ADAPID show all j'"
+        ADAPSTR="ssh -i /var/lib/zabbix/.ssh/id_rsa zabbix@$HOST 'esxcli --debug --formatter=json network nic list'"
         echo $ADAPSTR | bash
     fi
 fi
