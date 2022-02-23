@@ -14,10 +14,10 @@ HOST=$(grep -w $HVUID /etc/zabbix/scripts/hosts-uid-map.txt | awk '{print $NF}')
        echo "ssh -i /var/lib/zabbix/.ssh/id_rsa zabbix@$HOST 'esxcli --debug --formatter=json network nic list'" | bash
     else
 # Integer test value of a variable
-    re='^[0-9]+$'
-    if ! [[ $ADAPID =~ $re ]] ; then
-       echo "error: Not a number" >&2; exit 1
-    else
+#    re='^[A-Za-z0-9]+$'
+#    if ! [[ $ADAPID =~ $re ]] ; then
+#       echo "error: Not correct name" >&2; exit 1
+#    else
 # We form the data of the received controller
         ADAPSTR="ssh -i /var/lib/zabbix/.ssh/id_rsa zabbix@$HOST 'esxcli --debug --formatter=json network nic get -n $NICID'"
         echo $ADAPSTR | bash
