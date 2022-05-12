@@ -11,7 +11,7 @@ HOST=$(grep -w $HVUID /usr/lib/zabbix/internalscripts/hardware/esxi/hosts-uid-ma
 # Get controller id
 # If the controller id is not passed, we display all the information
     if [[ $CTLID = "" ]]; then
-       echo "ssh -i /usr/lib/zabbix/.ssh/id_rsa zabbix@$HOST '/opt/lsi/storcli/storcli /call/cv show all j'" | bash
+       echo "ssh -i /usr/lib/zabbix/.ssh/id_rsa zabbix@$HOST 'cd /opt/lsi/storcli && ./storcli /call/cv show all j'" | bash
     else
 # Integer test value of a variable
     re='^[0-9]+$'
@@ -19,7 +19,7 @@ HOST=$(grep -w $HVUID /usr/lib/zabbix/internalscripts/hardware/esxi/hosts-uid-ma
        echo "error: Not a number" >&2; exit 1
     else
 # We form the data of the received controller
-        CTLSTR="ssh -i /usr/lib/zabbix/.ssh/id_rsa zabbix@$HOST '/opt/lsi/storcli/storcli /c$CTLID/cv show all j'"
+        CTLSTR="ssh -i /usr/lib/zabbix/.ssh/id_rsa zabbix@$HOST 'cd /opt/lsi/storcli && ./storcli /c$CTLID/cv show all j'"
         echo $CTLSTR | bash
     fi
 fi
