@@ -1,0 +1,315 @@
+zabbix_export:
+  version: '6.0'
+  date: '2022-05-29T05:12:40Z'
+  groups:
+    -
+      uuid: 57b7ae836ca64446ba2c296389c009b7
+      name: Templates/Modules
+  templates:
+    -
+      uuid: 029477ff66ff45d9b8b7972a92f574ed
+      template: 'Template Module TCP Connections'
+      name: 'Template Module TCP Connections'
+      groups:
+        -
+          name: Templates/Modules
+      items:
+        -
+          uuid: 50a154e78ad44b9ca7677546669dc7ff
+          name: 'Get TCP Connections in JSON'
+          key: conn.json
+          history: 1d
+          trends: '0'
+          value_type: LOG
+          tags:
+            -
+              tag: Component
+              value: 'Sockets raw items'
+        -
+          uuid: ba8d15e986054ca3a80c0c35f7c7cefb
+          name: 'Connection: CLOSED'
+          type: DEPENDENT
+          key: 'conn[CLOSED]'
+          delay: '0'
+          history: 30d
+          description: 'Сокет не используется'
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.conn.CLOSED
+          master_item:
+            key: conn.json
+          tags:
+            -
+              tag: Network
+              value: Sockets
+        -
+          uuid: e5581ce97e87473bb15d991565697d87
+          name: 'Connection: CLOSE_WAIT'
+          type: DEPENDENT
+          key: 'conn[CLOSE_WAIT]'
+          delay: '0'
+          history: 30d
+          description: 'Удаленная сторона отключилась, ожидание закрытия сокета'
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.conn.CLOSE_WAIT
+          master_item:
+            key: conn.json
+          tags:
+            -
+              tag: Network
+              value: Sockets
+        -
+          uuid: 37318008d33243b58261f8900feea0f4
+          name: 'Connection: CLOSING'
+          type: DEPENDENT
+          key: 'conn[CLOSING]'
+          delay: '0'
+          history: 30d
+          description: 'Сокет закрыт, затем удаленная сторона отключилась и ожидается подтверждение'
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.conn.CLOSING
+          master_item:
+            key: conn.json
+          tags:
+            -
+              tag: Network
+              value: Sockets
+        -
+          uuid: 954484b7b0564048be927c8fc2547770
+          name: 'Connection: ESTABLISHED'
+          type: DEPENDENT
+          key: 'conn[ESTABLISHED]'
+          delay: '0'
+          history: 30d
+          description: 'Соединение установлено'
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.conn.ESTABLISHED
+          master_item:
+            key: conn.json
+          tags:
+            -
+              tag: Network
+              value: Sockets
+        -
+          uuid: 298d25a7d771460296c472b73fd9b72a
+          name: 'Connection: FIN_WAIT_2'
+          type: DEPENDENT
+          key: 'conn[FIN_WAIT2]'
+          delay: '0'
+          history: 30d
+          description: 'Сокет закрыт, ожидается отключение удаленной стороны'
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.conn.FIN_WAIT2
+          master_item:
+            key: conn.json
+          tags:
+            -
+              tag: Network
+              value: Sockets
+        -
+          uuid: a97cb73cf8914e3396c4070282f402e7
+          name: 'Connection: LAST_ACK'
+          type: DEPENDENT
+          key: 'conn[LAST_ACK]'
+          delay: '0'
+          history: 30d
+          description: 'Удаленная сторона отключилась, затем сокет закрыт и ожидается подтверждение'
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.conn.LAST_ACK
+          master_item:
+            key: conn.json
+          tags:
+            -
+              tag: Network
+              value: Sockets
+        -
+          uuid: 2334de40a25e458098058af4e85251fa
+          name: 'Connection: LISTEN'
+          type: DEPENDENT
+          key: 'conn[LISTEN]'
+          delay: '0'
+          history: 30d
+          description: 'Ожидает входящих соединений'
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.conn.LISTEN
+          master_item:
+            key: conn.json
+          tags:
+            -
+              tag: Network
+              value: Sockets
+        -
+          uuid: 217d95b6c5714c7993b53d2bf3100990
+          name: 'Connection: SYN_RECEIVED'
+          type: DEPENDENT
+          key: 'conn[SYN_RECV]'
+          delay: '0'
+          history: 30d
+          description: 'Идет начальная синхронизация соединения'
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.conn.SYN_RECV
+          master_item:
+            key: conn.json
+          tags:
+            -
+              tag: Network
+              value: Sockets
+        -
+          uuid: fcdd659f71f74ee78249a3501b137ce7
+          name: 'Connection: SYN_SENT'
+          type: DEPENDENT
+          key: 'conn[SYN_SENT]'
+          delay: '0'
+          history: 30d
+          description: 'Активно пытается установить соединение'
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.conn.SYN_SENT
+          master_item:
+            key: conn.json
+          tags:
+            -
+              tag: Network
+              value: Sockets
+        -
+          uuid: 0c6b5ea2282144dea4d46d7a6cfc47ac
+          name: 'Connection: TIME_WAIT'
+          type: DEPENDENT
+          key: 'conn[TIME_WAIT]'
+          delay: '0'
+          history: 30d
+          description: 'Сокет закрыт, но ожидает пакеты, ещё находящиеся в сети для обработки'
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.conn.TIME_WAIT
+          master_item:
+            key: conn.json
+          tags:
+            -
+              tag: Network
+              value: Sockets
+        -
+          uuid: 66dc4e3f16cb422799487d0cc2c0ea35
+          name: 'Connection: UNKNOWN'
+          type: DEPENDENT
+          key: 'conn[UNKNOWN]'
+          delay: '0'
+          history: 30d
+          description: 'Сокет в неизвестном состоянии'
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.conn.UNKNOWN
+          master_item:
+            key: conn.json
+          tags:
+            -
+              tag: Network
+              value: Sockets
+  graphs:
+    -
+      uuid: 1e611d58932f40b2b280a6cd2f404416
+      name: 'TCP Connections State'
+      show_work_period: 'NO'
+      show_triggers: 'NO'
+      type: STACKED
+      ymin_type_1: FIXED
+      graph_items:
+        -
+          sortorder: '1'
+          color: '004400'
+          calc_fnc: MAX
+          item:
+            host: 'Template Module TCP Connections'
+            key: 'conn[SYN_SENT]'
+        -
+          sortorder: '2'
+          color: 00EE00
+          calc_fnc: MAX
+          item:
+            host: 'Template Module TCP Connections'
+            key: 'conn[SYN_RECV]'
+        -
+          sortorder: '3'
+          color: '999999'
+          calc_fnc: MAX
+          item:
+            host: 'Template Module TCP Connections'
+            key: 'conn[LAST_ACK]'
+        -
+          sortorder: '5'
+          color: FF66FF
+          calc_fnc: MAX
+          item:
+            host: 'Template Module TCP Connections'
+            key: 'conn[FIN_WAIT2]'
+        -
+          sortorder: '6'
+          color: '000066'
+          calc_fnc: MAX
+          item:
+            host: 'Template Module TCP Connections'
+            key: 'conn[CLOSING]'
+        -
+          sortorder: '7'
+          color: FF6666
+          calc_fnc: MAX
+          item:
+            host: 'Template Module TCP Connections'
+            key: 'conn[CLOSE_WAIT]'
+        -
+          sortorder: '8'
+          color: '555555'
+          calc_fnc: MAX
+          item:
+            host: 'Template Module TCP Connections'
+            key: 'conn[CLOSED]'
+        -
+          sortorder: '9'
+          color: FF99FF
+          calc_fnc: MAX
+          item:
+            host: 'Template Module TCP Connections'
+            key: 'conn[LISTEN]'
+        -
+          sortorder: '10'
+          color: '009900'
+          calc_fnc: MAX
+          item:
+            host: 'Template Module TCP Connections'
+            key: 'conn[ESTABLISHED]'
+        -
+          sortorder: '11'
+          color: 6666FF
+          calc_fnc: MAX
+          item:
+            host: 'Template Module TCP Connections'
+            key: 'conn[TIME_WAIT]'
