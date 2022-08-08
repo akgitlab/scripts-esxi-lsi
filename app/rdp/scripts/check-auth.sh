@@ -1,25 +1,14 @@
 #!/bin/bash
 
-# Collecting data from network adapters
-# Andrey Kuznetsov, 2022.02.23
+# Checking connectivity to MS Terminal server
+# Andrey Kuznetsov, 2022.08.08
 
 # Get variables
-HVUID=$1
-NICID=$2
-HOST=$(grep -w $HVUID /usr/lib/zabbix/internalscripts/hardware/esxi/hosts-uid-map.txt | awk '{print $NF}')
+DOMAIN=$1
+USERNAME=$2
+PASSWORD=$3
+FDQN=$4
+OUTFILE=$(xfreerdp /u:$USERNAME /d:$DOMAIN /p:$PASSWORD /v:$FDQN +auth-only /log-level:ERROR > /home/devops/$FDQN.log 2>&1)
 
-# Get controller id
-# If the controller id is not passed, we display all the information
-    if [[ $NICID = "" ]]; then
-       echo "ssh -i /usr/lib/zabbix/.ssh/id_rsa zabbix@$HOST 'esxcli --debug --formatter=json network nic list'" | bash
-    else
-# Integer test value of a variable
-    re='^[A-Za-z0-9]+$'
-    if ! [[ $NICID =~ $re ]] ; then
-       echo "error: Not correct name" >&2; exit 1
-    else
-# We form the data of the received controller
-        STR="ssh -i /usr/lib/zabbix/.ssh/id_rsa zabbix@$HOST 'esxcli --debug --formatter=json network nic get -n $NICID'"
-        echo $STR | bash
-    fi
-fi
+RESULT="cat /home/devops/$FDQN.log | grep -m1 "Authentication only" | awk '{print substr($0,length,1)}'"
+echo $RESULT | bash
