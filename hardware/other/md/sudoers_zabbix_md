@@ -1,0 +1,3 @@
+Cmnd_Alias ZABBIX_MD = /etc/zabbix/scripts/md_active_devices.sh,/etc/zabbix/scripts/md_array_size.sh,/etc/zabbix/scripts/md_failed_devices.sh,/etc/zabbix/scripts/md_raid_devices.sh,/etc/zabbix/scripts/md_raid_level.sh,/etc/zabbix/scripts/md_spare_devices.sh,/etc/zabbix/scripts/md_state.sh,/etc/zabbix/scripts/md_total_devices.sh,/etc/zabbix/scripts/md_used_dev_size.sh,/etc/zabbix/scripts/md_working_devices.sh
+zabbix ALL= (root) NOPASSWD: ZABBIX_MD
+Defaults!ZABBIX_MD !logfile, !syslog, !pam_session
