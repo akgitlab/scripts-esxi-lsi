@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>5.0</version>
+    <date>2022-02-16T13:18:56Z</date>
+    <groups>
+        <group>
+            <name>Templates</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template MD RAID</template>
+            <name>Template MD RAID</name>
+            <description>Monitoring of MD Soft RAID</description>
+            <groups>
+                <group>
+                    <name>Templates</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>MD</name>
+                </application>
+            </applications>
+            <items>
+                <item>
+                    <name>MD speed limit max</name>
+                    <key>md.speed_limit_max</key>
+                    <delay>{$MD_LONG_PERIOD}</delay>
+                    <history>{$MD_HISTORY_PERIOD}</history>
+                    <trends>{$MD_TREND_PERIOD}</trends>
+                    <units>B/sec</units>
+                    <description>Max limit speed of sync</description>
+                    <applications>
+                        <application>
+                            <name>MD</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>MULTIPLIER</type>
+                            <params>1024</params>
+                        </step>
+                    </preprocessing>
+                </item>
+                <item>
+                    <name>MD speed limit min</name>
+                    <key>md.speed_limit_min</key>
+                    <delay>{$MD_LONG_PERIOD}</delay>
+                    <history>{$MD_HISTORY_PERIOD}</history>
+                    <trends>{$MD_TREND_PERIOD}</trends>
+                    <units>B/sec</units>
+                    <description>Min limit speed of sync</description>
+                    <applications>
+                        <application>
+                            <name>MD</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>MULTIPLIER</type>
+                            <params>1024</params>
+                        </step>
+                    </preprocessing>
+                </item>
+            </items>
+            <discovery_rules>
+                <discovery_rule>
+                    <name>MD Discovery</name>
+                    <key>md.discover</key>
+                    <delay>{$MD_DISCOVERY_PERIOD}</delay>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>MD $1 active devices</name>
+                            <key>md.active_devices[{#MDNAME}]</key>
+                            <delay>{$MD_SHORT_PERIOD}</delay>
+                            <history>{$MD_HISTORY_PERIOD}</history>
+                            <trends>{$MD_TREND_PERIOD}</trends>
+                            <description>Get number of active disks</description>
+                            <applications>
+                                <application>
+                                    <name>MD</name>
+                                </application>
+                            </applications>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{diff()}&gt;0</expression>
+                                    <name>MD {#MDNAME} number of active devices changed on {HOST.NAME} (HW)</name>
+                                    <priority>AVERAGE</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>MD $1 array size</name>
+                            <key>md.array_size[{#MDNAME}]</key>
+                            <delay>{$MD_SHORT_PERIOD}</delay>
+                            <history>{$MD_HISTORY_PERIOD}</history>
+                            <trends>{$MD_TREND_PERIOD}</trends>
+                            <units>B</units>
+                            <description>Get array size</description>
+                            <applications>
+                                <application>
+                                    <name>MD</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>MULTIPLIER</type>
+                                    <params>1024</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>MD $1 failed devices</name>
+                            <key>md.failed_devices[{#MDNAME}]</key>
+                            <delay>{$MD_SHORT_PERIOD}</delay>
+                            <history>{$MD_HISTORY_PERIOD}</history>
+                            <trends>{$MD_TREND_PERIOD}</trends>
+                            <description>Get number of failed disks</description>
+                            <applications>
+                                <application>
+                                    <name>MD</name>
+                                </application>
+                            </applications>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&gt;0</expression>
+                                    <name>MD {#MDNAME} failed devices on {HOST.NAME} (HW)</name>
+                                    <priority>HIGH</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>MD $1 level</name>
+                            <key>md.level[{#MDNAME}]</key>
+                            <delay>{$MD_LONG_PERIOD}</delay>
+                            <history>{$MD_HISTORY_PERIOD}</history>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <description>RAID level</description>
+                            <applications>
+                                <application>
+                                    <name>MD</name>
+                                </application>
+                            </applications>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>MD $1 raid devices</name>
+                            <key>md.raid_devices[{#MDNAME}]</key>
+                            <delay>{$MD_SHORT_PERIOD}</delay>
+                            <history>{$MD_HISTORY_PERIOD}</history>
+                            <trends>{$MD_TREND_PERIOD}</trends>
+                            <description>Get number of raid disks</description>
+                            <applications>
+                                <application>
+                                    <name>MD</name>
+                                </application>
+                            </applications>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{diff()}&gt;0</expression>
+                                    <name>MD {#MDNAME} number of raid devices changed on {HOST.NAME} (HW)</name>
+                                    <priority>AVERAGE</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>MD $1 spare devices</name>
+                            <key>md.spare_devices[{#MDNAME}]</key>
+                            <delay>{$MD_SHORT_PERIOD}</delay>
+                            <history>{$MD_HISTORY_PERIOD}</history>
+                            <trends>{$MD_TREND_PERIOD}</trends>
+                            <description>Get number of spare disks</description>
+                            <applications>
+                                <application>
+                                    <name>MD</name>
+                                </application>
+                            </applications>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{diff()}&gt;0</expression>
+                                    <name>MD {#MDNAME} number of spare devices changed on {HOST.NAME} (HW)</name>
+                                    <priority>AVERAGE</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>MD $1 state</name>
+                            <key>md.state[{#MDNAME}]</key>
+                            <delay>{$MD_HOT_PERIOD}</delay>
+                            <history>{$MD_HISTORY_PERIOD}</history>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <description>RAID state</description>
+                            <applications>
+                                <application>
+                                    <name>MD</name>
+                                </application>
+                            </applications>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{str(checking)}=1</expression>
+                                    <name>MD {#MDNAME} checking on {HOST.NAME}</name>
+                                    <priority>INFO</priority>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;&gt;&quot;clean&quot; and &#13;
+{last()}&lt;&gt;&quot;clean, checking&quot; and&#13;
+{last()}&lt;&gt;&quot;clean, resyncing&quot; and&#13;
+{last()}&lt;&gt;&quot;clean, resyncing (DELAYED)&quot; and&#13;
+{last()}&lt;&gt;&quot;clean, reshaping&quot; and&#13;
+{last()}&lt;&gt;&quot;clean, degraded&quot; and&#13;
+{last()}&lt;&gt;&quot;clean, degraded, recovering&quot; and&#13;
+{last()}&lt;&gt;&quot;active&quot; and &#13;
+{last()}&lt;&gt;&quot;active, checking&quot; and&#13;
+{last()}&lt;&gt;&quot;active, resyncing&quot; and&#13;
+{last()}&lt;&gt;&quot;active, resyncing (DELAYED)&quot; and&#13;
+{last()}&lt;&gt;&quot;active, reshaping&quot; and&#13;
+{last()}&lt;&gt;&quot;active, degraded&quot; and&#13;
+{last()}&lt;&gt;&quot;active, degraded, recovering&quot; and&#13;
+{last()}&lt;&gt;&quot;no state&quot;</expression>
+                                    <name>MD {#MDNAME} check state &quot;{ITEM.LASTVALUE}&quot; on {HOST.NAME} (HW)</name>
+                                    <priority>WARNING</priority>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <expression>{str(recover)}=1</expression>
+                                    <name>MD {#MDNAME} in recovery mode on {HOST.NAME}</name>
+                                    <priority>WARNING</priority>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <expression>{str(degraded)}=1</expression>
+                                    <name>MD {#MDNAME} is degraded on {HOST.NAME} (HW)</name>
+                                    <priority>HIGH</priority>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <expression>{str(FAILED)}=1</expression>
+                                    <name>MD {#MDNAME} is failed on {HOST.NAME} (HW)</name>
+                                    <priority>HIGH</priority>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <expression>{str(mdadm: cannot open)}=1</expression>
+                                    <name>MD {#MDNAME} is missing on {HOST.NAME} (HW)</name>
+                                    <priority>HIGH</priority>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <expression>{str(Not Started)}=1</expression>
+                                    <name>MD {#MDNAME} is not started on {HOST.NAME} (HW)</name>
+                                    <priority>WARNING</priority>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <expression>{str(reshaping)}=1</expression>
+                                    <name>MD {#MDNAME} is reshaping on {HOST.NAME}</name>
+                                    <priority>INFO</priority>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <expression>{str(resync)}=1</expression>
+                                    <name>MD {#MDNAME} is resyncing on {HOST.NAME}</name>
+                                    <priority>INFO</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>MD $1 total devices</name>
+                            <key>md.total_devices[{#MDNAME}]</key>
+                            <delay>{$MD_SHORT_PERIOD}</delay>
+                            <history>{$MD_HISTORY_PERIOD}</history>
+                            <trends>{$MD_TREND_PERIOD}</trends>
+                            <description>Get number of total disks</description>
+                            <applications>
+                                <application>
+                                    <name>MD</name>
+                                </application>
+                            </applications>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{diff()}&gt;0</expression>
+                                    <name>MD {#MDNAME} number of total devices changed on {HOST.NAME} (HW)</name>
+                                    <priority>AVERAGE</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>MD $1 used dev size</name>
+                            <key>md.used_dev_size[{#MDNAME}]</key>
+                            <delay>{$MD_SHORT_PERIOD}</delay>
+                            <history>{$MD_HISTORY_PERIOD}</history>
+                            <trends>{$MD_TREND_PERIOD}</trends>
+                            <units>B</units>
+                            <description>Get used dev size</description>
+                            <applications>
+                                <application>
+                                    <name>MD</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>MULTIPLIER</type>
+                                    <params>1024</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>MD $1 working devices</name>
+                            <key>md.working_devices[{#MDNAME}]</key>
+                            <delay>{$MD_SHORT_PERIOD}</delay>
+                            <history>{$MD_HISTORY_PERIOD}</history>
+                            <trends>{$MD_TREND_PERIOD}</trends>
+                            <description>Get number of working disks</description>
+                            <applications>
+                                <application>
+                                    <name>MD</name>
+                                </application>
+                            </applications>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{diff()}&gt;0</expression>
+                                    <name>MD {#MDNAME} number of working devices changed on {HOST.NAME} (HW)</name>
+                                    <priority>AVERAGE</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                    </item_prototypes>
+                </discovery_rule>
+            </discovery_rules>
+            <macros>
+                <macro>
+                    <macro>{$MD_DISCOVERY_PERIOD}</macro>
+                    <value>1h</value>
+                    <description>time</description>
+                </macro>
+                <macro>
+                    <macro>{$MD_HISTORY_PERIOD}</macro>
+                    <value>30d</value>
+                    <description>time</description>
+                </macro>
+                <macro>
+                    <macro>{$MD_HOT_PERIOD}</macro>
+                    <value>5m</value>
+                    <description>time</description>
+                </macro>
+                <macro>
+                    <macro>{$MD_LONG_PERIOD}</macro>
+                    <value>1h</value>
+                    <description>time</description>
+                </macro>
+                <macro>
+                    <macro>{$MD_SHORT_PERIOD}</macro>
+                    <value>10m</value>
+                    <description>time</description>
+                </macro>
+                <macro>
+                    <macro>{$MD_TREND_PERIOD}</macro>
+                    <value>180d</value>
+                    <description>time</description>
+                </macro>
+            </macros>
+        </template>
+    </templates>
+</zabbix_export>
