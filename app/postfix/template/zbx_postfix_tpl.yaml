@@ -1,0 +1,290 @@
+zabbix_export:
+  version: '6.0'
+  date: '2022-10-13T05:14:04Z'
+  groups:
+    -
+      uuid: a571c0d144b14fd4a87a9d9b2aa9fcd6
+      name: Templates/Applications
+  templates:
+    -
+      uuid: bbde09a0b20d4c80b76b2e23d40bc282
+      template: 'Template App Postfix MTA'
+      name: 'Template App Postfix MTA'
+      description: |
+        https://internet-lab.ru/zabbix5_postfix
+        
+        В скрипте ошибка!
+        Запустите следующую команду в терминале
+        sed -i -e 's/\r$//' scriptname.sh
+        Затем попробуйте
+        ./scriptname.sh
+      groups:
+        -
+          name: Templates/Applications
+      items:
+        -
+          uuid: 4eac09eda82648829c1d02cad7f72f17
+          name: 'Postfix: Bounced'
+          key: 'postfix[bounced]'
+          delay: 5m
+          history: 30d
+          trends: 180d
+          description: 'Очередь сообщений с уведомлением о невозможности доставки по каким-либо причинам'
+          tags:
+            -
+              tag: Application
+              value: Postfix
+          triggers:
+            -
+              uuid: 96e10363e6eb4ca88fed656634cad053
+              expression: 'last(/Template App Postfix MTA/postfix[bounced])>{$POSTFIX_MAX_BOUNCED}'
+              name: 'Postfix: Too many bounced mails on {HOST.NAME}'
+              priority: WARNING
+        -
+          uuid: 89e8c3921490447c94a1e872e26f933f
+          name: 'Postfix: Connect from'
+          key: 'postfix[connect_from]'
+          delay: 5m
+          history: 30d
+          trends: 180d
+          tags:
+            -
+              tag: Application
+              value: Postfix
+        -
+          uuid: 906c0c57d8c843c19e5248e0a572bcd3
+          name: 'Postfix: Connect to'
+          key: 'postfix[connect_to]'
+          delay: 5m
+          history: 30d
+          trends: 180d
+          tags:
+            -
+              tag: Application
+              value: Postfix
+        -
+          uuid: 6f598e1bdfe1435f8369f9308362becb
+          name: 'Postfix: Deferred'
+          key: 'postfix[deferred]'
+          delay: 5m
+          history: 30d
+          trends: 180d
+          description: 'Количество недоставленных писем (более известны как отложенные письма)'
+          tags:
+            -
+              tag: Application
+              value: Postfix
+          triggers:
+            -
+              uuid: 27bcb48ab5014016ab16982a48d2835e
+              expression: 'last(/Template App Postfix MTA/postfix[deferred])>{$POSTFIX_MAX_DEFERRED}'
+              name: 'Postfix: Too many deferred mails on {HOST.NAME}'
+              priority: WARNING
+        -
+          uuid: d6d77c5c96bf4a0e8d635408b505dbbb
+          name: 'Postfix: Expired'
+          key: 'postfix[expired]'
+          delay: 5m
+          history: 30d
+          trends: 180d
+          tags:
+            -
+              tag: Application
+              value: Postfix
+        -
+          uuid: 1e86f1c601fc40088615765c2f598555
+          name: 'Postfix: Queue'
+          key: 'postfix[queue]'
+          delay: 5m
+          history: 30d
+          trends: 180d
+          description: 'Общее количество отложенных и ожидающих отправки писем'
+          tags:
+            -
+              tag: Application
+              value: Postfix
+          triggers:
+            -
+              uuid: bac7da33579a444fb48cbca6b0614f16
+              expression: 'last(/Template App Postfix MTA/postfix[queue])>{$POSTFIX_MAX_QUEUE}'
+              name: 'Postfix: Too many queue mails on {HOST.NAME}'
+              priority: WARNING
+        -
+          uuid: 960ba48585d04192a71a1433b35520b7
+          name: 'Postfix: Refused'
+          key: 'postfix[refused]'
+          delay: 5m
+          history: 30d
+          trends: 180d
+          tags:
+            -
+              tag: Application
+              value: Postfix
+          triggers:
+            -
+              uuid: 99c54a4c4ea94b20b12f8cb7837d0697
+              expression: 'last(/Template App Postfix MTA/postfix[refused])>{$POSTFIX_MAX_REFUSED}'
+              name: 'Postfix: Too many refused mails on {HOST.NAME}'
+              priority: WARNING
+        -
+          uuid: 742126783ea44b7dad855e44aca79eea
+          name: 'Postfix: Reject'
+          key: 'postfix[reject]'
+          delay: 5m
+          history: 30d
+          trends: 180d
+          description: 'Количество отклоненных сообщений'
+          tags:
+            -
+              tag: Application
+              value: Postfix
+          triggers:
+            -
+              uuid: fc419e5e26d645c3b6ccea85f7e28ad1
+              expression: 'last(/Template App Postfix MTA/postfix[reject])>{$POSTFIX_MAX_REJECTED}'
+              name: 'Postfix: Too many rejected mails on {HOST.NAME}'
+              priority: WARNING
+        -
+          uuid: 457cd41abb584d1bb1bc7f90f0701dd8
+          name: 'Postfix: Sent'
+          key: 'postfix[sent]'
+          delay: 5m
+          history: 30d
+          trends: 180d
+          description: 'Количество успешно отправленных писем'
+          tags:
+            -
+              tag: Application
+              value: Postfix
+      macros:
+        -
+          macro: '{$POSTFIX_MAX_BOUNCED}'
+          value: '1000'
+        -
+          macro: '{$POSTFIX_MAX_DEFERRED}'
+          value: '20000'
+        -
+          macro: '{$POSTFIX_MAX_QUEUE}'
+          value: '30000'
+        -
+          macro: '{$POSTFIX_MAX_REFUSED}'
+          value: '1000'
+        -
+          macro: '{$POSTFIX_MAX_REJECTED}'
+          value: '1000'
+  graphs:
+    -
+      uuid: 41be22e18e34417a83e25a125d423d74
+      name: 'Postfix Connections'
+      height: '300'
+      show_work_period: 'NO'
+      show_triggers: 'NO'
+      graph_items:
+        -
+          color: 1A7C11
+          item:
+            host: 'Template App Postfix MTA'
+            key: 'postfix[connect_from]'
+        -
+          sortorder: '1'
+          color: F63100
+          item:
+            host: 'Template App Postfix MTA'
+            key: 'postfix[connect_to]'
+    -
+      uuid: 3d66ab1b57a342c99e3930d2d696954e
+      name: 'Postfix Mails'
+      height: '300'
+      show_work_period: 'NO'
+      show_triggers: 'NO'
+      show_legend: 'NO'
+      graph_items:
+        -
+          color: DDDD00
+          item:
+            host: 'Template App Postfix MTA'
+            key: 'postfix[bounced]'
+        -
+          sortorder: '1'
+          color: '880088'
+          item:
+            host: 'Template App Postfix MTA'
+            key: 'postfix[reject]'
+        -
+          sortorder: '2'
+          color: 00EE00
+          item:
+            host: 'Template App Postfix MTA'
+            key: 'postfix[sent]'
+        -
+          sortorder: '3'
+          color: FF6666
+          item:
+            host: 'Template App Postfix MTA'
+            key: 'postfix[deferred]'
+        -
+          sortorder: '4'
+          color: FFCCCC
+          item:
+            host: 'Template App Postfix MTA'
+            key: 'postfix[expired]'
+        -
+          sortorder: '5'
+          color: 6C59DC
+          item:
+            host: 'Template App Postfix MTA'
+            key: 'postfix[refused]'
+        -
+          sortorder: '6'
+          color: AA0000
+          item:
+            host: 'Template App Postfix MTA'
+            key: 'postfix[queue]'
+    -
+      uuid: 20232736fa9f44239da1cbb071e38a2c
+      name: 'Postfix Mails Legended'
+      height: '300'
+      show_work_period: 'NO'
+      show_triggers: 'NO'
+      graph_items:
+        -
+          color: DDDD00
+          item:
+            host: 'Template App Postfix MTA'
+            key: 'postfix[bounced]'
+        -
+          sortorder: '1'
+          color: '880088'
+          item:
+            host: 'Template App Postfix MTA'
+            key: 'postfix[reject]'
+        -
+          sortorder: '2'
+          color: 00EE00
+          item:
+            host: 'Template App Postfix MTA'
+            key: 'postfix[sent]'
+        -
+          sortorder: '3'
+          color: FF6666
+          item:
+            host: 'Template App Postfix MTA'
+            key: 'postfix[deferred]'
+        -
+          sortorder: '4'
+          color: FFCCCC
+          item:
+            host: 'Template App Postfix MTA'
+            key: 'postfix[expired]'
+        -
+          sortorder: '5'
+          color: 6C59DC
+          item:
+            host: 'Template App Postfix MTA'
+            key: 'postfix[refused]'
+        -
+          sortorder: '6'
+          color: AA0000
+          item:
+            host: 'Template App Postfix MTA'
+            key: 'postfix[queue]'
