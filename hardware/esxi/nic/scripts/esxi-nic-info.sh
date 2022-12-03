@@ -15,7 +15,7 @@ FDQN=$1
 # Make sure only root can run our script
 if [[ $EUID -ne 0 ]]
 then
-  echo -e "\033[0m\033[0m\033[31mError: This script must be run as root!"
+  echo -e "\033[0m\033[0m\033[31mError: This script must be run only as root or privileged user!"
   tput sgr0
   exit 1
 fi
