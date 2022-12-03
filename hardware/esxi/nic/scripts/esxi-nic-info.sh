@@ -2,8 +2,12 @@
 
 # Adding a new resource to reverce-proxy server
 
-# Andrey Kuznetsov, 2022.10.26
+# Andrey Kuznetsov, 2022.12.03
 # Telegram: https://t.me/akmsg
+
+# The script is in the directory /usr/local/scripts/publish.sh
+# For convenience create symbolic link ln -s /usr/local/scripts/publish.sh /usr/local/bin/publish
+# And use like publish example.com
 
 # Get variables
 LOG="/var/log/nginx/publish.log"
