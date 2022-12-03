@@ -12,17 +12,16 @@ DATE=$(date  +%Y)
 EXTIP=$(curl eth0.me 2>&1)
 FDQN=$1
 
-# Start a new resource publication
-echo -e "\n$(date '+%d/%m/%Y %H:%M:%S') [info] User $LOGIN start a new resource publication" >> $LOG
-
 # Make sure only root can run our script
 if [[ $EUID -ne 0 ]]
 then
-  echo "$(date '+%d/%m/%Y %H:%M:%S') [warn] Attempt to run a script as an unprivileged user" >> $LOG
   echo -e "\033[0m\033[0m\033[31mError: This script must be run as root!"
   tput sgr0
   exit 1
 fi
+
+# Start a new resource publication
+echo -e "\n$(date '+%d/%m/%Y %H:%M:%S') [info] User $LOGIN start a new resource publication" >> $LOG
 
 # Check received user variables
 if [[ $FDQN = "" ]]
