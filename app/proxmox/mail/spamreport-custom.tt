@@ -1,0 +1,57 @@
+[%- IF timespan == 'week' -%]
+[%- SET title = "Weekly Spam Report- ${date}'" -%]
+[%- ELSE %]
+[%- SET title = "=?UTF-8?Q?=E5=9E=83=E5=9C=BE=E9=83=B5=E4=BB=B6=E9=9A=94=E9=9B=A2=E6=B8=85=E5=96=AE?= ${date}" -%]
+[%- END -%]
+
+[% BLOCK tooltip %]接收時間: [% d.date %] [% d.time %]
+寄件者: [% d.envelope_sender %]
+收件者: [% d.receiver %]
+大小: [% d.bytes %]
+分數: [% d.spamlevel %]
+[% END %]
+
+<html>
+  <head>
+    <title>[% title %]</title>
+  </head>
+  <body>
+
+    <div align=center>
+
+
+      <table width='100%'>
+        <tr>
+          <td colspan=2>
+            <div style='width:600px;'><h2>垃圾郵件隔離清單 [% date %]</h2></div>
+          </td>
+        </tr>
+
+        <tr><td colspan=2><hr></td></tr>
+
+        <!--start entries-->
+        [% FOREACH item IN items %]
+        <tr>
+          <td>寄件者:[% item.from %]</td>
+          <td align=right nowrap>接收時間:[% item.date %] [% item.time %]</td>
+        </tr>
+        <tr title='[% PROCESS tooltip d=item | html  %]'>
+          <td>主旨:<b>[% item.subject %]</b></td>
+          <td align=right nowrap>
+            <div style='font-size:xx-small;'>
+              <a href='[% item.href | url %]&action=deliver'>取回郵件</a>&nbsp;
+            </div>
+          </td>
+        </tr>
+        <tr><td colspan=2><hr></td></tr>
+        [% END %]
+        <!--end entries-->
+
+      </table>
+
+      <p>Powered by Proxmox Mail Gateway</p>
+
+    </div>
+
+  </body>
+</html>
