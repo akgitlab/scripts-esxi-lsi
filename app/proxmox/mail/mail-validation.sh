@@ -16,6 +16,7 @@ LINK="https://github.com/deajan/linuxscripts"
 
 ## Warning: when processing files command windows, use dos2unix first to convert carriage return chars
 
+## Usage: emailCheck.sh /path/to/email_list
 
 ###################################################################################################### Input file format options
 
